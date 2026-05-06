@@ -102,12 +102,27 @@ body::before {
   max-width: 620px;
 }
 
-.tagline {
-  font-size: 13px;
+/* INTRO LINES */
+
+.intro-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 28px;
+}
+
+.intro-line {
+  font-size: 14px;
   color: var(--muted);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  margin-bottom: 20px;
+  letter-spacing: .06em;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+
+.intro-line.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 h1 {
@@ -117,6 +132,14 @@ h1 {
   letter-spacing: -.02em;
   color: var(--cream);
   margin-bottom: 36px;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .8s ease, transform .8s ease;
+}
+
+h1.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 h1 em {
@@ -138,6 +161,14 @@ h1 em {
   text-decoration: none;
   transition: .2s ease;
   letter-spacing: .01em;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .7s ease, transform .7s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.cta.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .cta:hover {
@@ -147,7 +178,7 @@ h1 em {
 }
 
 @media (max-width: 600px) {
-  .nav { padding: 20px 20px; }
+  .nav { padding: 20px; }
   .hero { padding: 0 20px 48px; }
   h1 { font-size: 38px; }
 }

@@ -87,6 +87,13 @@ button { font: inherit; }
 
 .logo:hover { opacity: 1; }
 
+.panel-tagline {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 0 0 24px;
+}
+
 .logo-mobile {
   width: 60px;
   height: auto;
@@ -225,6 +232,20 @@ button { font: inherit; }
 .autoplay-toggle.is-active .toggle-dot {
   background: var(--warm);
   box-shadow: 0 0 0 3px rgba(207,169,120,.12);
+}
+.autoplay-toggle.prominent {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0 14px;
+  height: 36px;
+  font-size: 13px;
+}
+
+.ambient-hint {
+  font-size: 11px;
+  color: var(--faint);
+  line-height: 1.5;
+  margin-top: 8px;
 }
 
 /* CONTENT */

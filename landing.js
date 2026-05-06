@@ -20,3 +20,24 @@ fetch(
   document.getElementById("bg").style.backgroundImage = `url(${photo.urls.regular})`;
 })
 .catch(err => console.error(err));
+
+// Intro Animation
+setTimeout(() => {
+  document.getElementById("line1").classList.add("visible");
+}, 400);
+
+setTimeout(() => {
+  document.getElementById("line2").classList.add("visible");
+}, 900);
+
+setTimeout(() => {
+  document.getElementById("line3").classList.add("visible");
+}, 1400);
+
+setTimeout(() => {
+  document.getElementById("heroTitle").classList.add("visible");
+}, 2000);
+
+setTimeout(() => {
+  document.getElementById("heroCta").classList.add("visible");
+}, 2600);
