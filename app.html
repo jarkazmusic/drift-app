@@ -9,32 +9,20 @@
 
 <body>
   <div class="app">
-    <aside class="sidebar">
-      <div>
-        <div class="brand-row">
-          <img src="driftlogo.png" alt="Drift Logo" class="logo">
-        </div>
 
-        <p class="intro">
-          A curated stream of vintage images and videos from across the web.
-        </p>
+    <header class="header">
+      <a href="index.html">
+        <img src="driftlogo.png" alt="Drift" class="logo">
+      </a>
 
-        <nav class="nav">
-          <div class="nav-item active"><span class="icon">〰</span> Stream</div>
-          <div class="nav-item"><span class="icon">▦</span> Boards</div>
-          <div class="nav-item"><span class="icon">♡</span> Favorites</div>
-          <div class="nav-item"><span class="icon">◷</span> History</div>
-        </nav>
-
+      <div class="header-filters">
         <div class="media-toggle">
           <div class="media-toggle-btn active" data-mode="images">⬡ Images</div>
           <div class="media-toggle-btn" data-mode="video">▶ Video</div>
         </div>
 
-        <div class="section-label" style="margin-top: 28px;">Mood Channel</div>
-
         <div class="filters">
-          <div class="filter active" data-filter="all"><span class="filter-dot"></span>All Drifts</div>
+          <div class="filter active" data-filter="all"><span class="filter-dot"></span>All</div>
           <div class="filter" data-filter="vhs-summer"><span class="filter-dot"></span>VHS Summer</div>
           <div class="filter" data-filter="empty-roads"><span class="filter-dot"></span>Empty Roads</div>
           <div class="filter" data-filter="late-night"><span class="filter-dot"></span>Late Night</div>
@@ -44,33 +32,15 @@
         </div>
       </div>
 
-      <div class="user-card">
-        <div class="user-left">
-          <div class="avatar"></div>
-          <div>
-            <div style="color:var(--text)">Drifter</div>
-            <div>Local Prototype</div>
-          </div>
-        </div>
-        <div>⌄</div>
+      <div class="header-actions">
+        <button class="autoplay-toggle" id="autoplayToggle">
+          <span class="toggle-dot"></span>
+          Ambient
+        </button>
       </div>
-    </aside>
+    </header>
 
     <section class="content">
-      <div class="topbar">
-        <div class="status"><span class="wave">〰</span> Now drifting</div>
-
-        <div class="top-actions">
-          <button class="autoplay-toggle" id="autoplayToggle">
-            <span class="toggle-dot"></span>
-            Ambient
-          </button>
-
-          <div class="top-action tooltip" data-tip="Search later">⌕</div>
-          <div class="top-action tooltip" data-tip="Grid view later">▦</div>
-        </div>
-      </div>
-
       <div class="hero-wrap">
         <div class="hero">
           <a id="mediaLink" href="#" target="_blank">
@@ -123,7 +93,6 @@
 
       <div class="info-block">
         <div class="info-title">Source</div>
-
         <a class="source-card" id="authorLink" href="#" target="_blank">
           <div class="source-icon" id="sourceIcon">?</div>
           <div>
@@ -152,7 +121,6 @@
           Save to board
           <span class="new-board">+ New Board</span>
         </div>
-
         <div class="boards">
           <div class="board">
             <div class="board-thumb"></div>
@@ -160,14 +128,12 @@
             <span class="count">0</span>
             <span>▱</span>
           </div>
-
           <div class="board">
             <div class="board-thumb"></div>
             <span>Boards of Canada</span>
             <span class="count">0</span>
             <span>▱</span>
           </div>
-
           <div class="board">
             <div class="board-thumb"></div>
             <span>Faded Landscapes</span>
@@ -183,6 +149,7 @@
         <button>Upgrade later</button>
       </div>
     </aside>
+
   </div>
 
   <script src="config.js"></script>
