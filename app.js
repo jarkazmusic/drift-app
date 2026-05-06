@@ -1,0 +1,480 @@
+let items = [];
+let currentIndex = 0;
+let isTransitioning = false;
+
+let favorites =
+  JSON.parse(localStorage.getItem("driftFavorites")) || [];
+
+let currentFilter = "all";
+
+let autoplayEnabled = false;
+let autoplayTimer = null;
+
+const AUTOPLAY_DELAY = 15000;
+
+const FILTERS = {
+  all: [
+    "analog landscape",
+    "cinematic nostalgia",
+    "faded road",
+    "dreamy coast",
+    "vintage ocean"
+  ],
+
+  analog: [
+    "kodak film",
+    "analog photography",
+    "vhs aesthetic",
+    "faded memories",
+    "film grain"
+  ],
+
+  landscape: [
+    "foggy forest",
+    "dreamy landscape",
+    "cinematic mountains",
+    "misty road",
+    "nature nostalgia"
+  ],
+
+  city: [
+    "rainy tokyo",
+    "night city film",
+    "urban nostalgia",
+    "cinematic city",
+    "retro street"
+  ],
+
+  people: [
+    "nostalgic portrait",
+    "dreamy people",
+    "cinematic portrait",
+    "faded youth",
+    "analog people"
+  ],
+
+  "still-life": [
+    "vintage objects",
+    "film camera",
+    "analog desk",
+    "nostalgic room",
+    "retro still life"
+  ],
+
+  video: [
+    "cinematic motion",
+    "dreamy movement",
+    "film still",
+    "movie atmosphere",
+    "ambient scene"
+  ]
+};
+
+async function loadItems(filter = "all") {
+  try {
+    currentFilter = filter;
+
+    const filterQueries = FILTERS[filter];
+
+    const randomQuery =
+      filterQueries[
+        Math.floor(Math.random() * filterQueries.length)
+      ];
+
+    const response = await fetch(
+      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(randomQuery)}&per_page=18&orientation=landscape`,
+      {
+        headers: {
+          Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    items = data.results.map((photo) => ({
+      id: photo.id,
+
+      title:
+        photo.alt_description ||
+        photo.description ||
+        "Untitled Drift",
+
+      type: "image",
+
+      mediaUrl: photo.urls.regular,
+
+      originalUrl: photo.links.html,
+
+      authorName: photo.user.name,
+
+      authorUrl: photo.user.links.html,
+
+      sourceName: "Unsplash",
+
+      licenseName: "Unsplash License",
+
+      licenseUrl: "https://unsplash.com/license",
+
+      year:
+        photo.created_at
+          ? new Date(photo.created_at).getFullYear()
+          : "—",
+
+      tags:
+        photo.tags?.slice(0, 5).map((tag) => tag.title) || [],
+
+      details: [
+        `◌ Curated via ${randomQuery}`,
+        "▣ External source linked",
+        "⌖ Creator credited"
+      ]
+    }));
+
+    currentIndex = 0;
+
+    renderItem(false);
+    renderMoreLikeThis();
+
+  } catch (error) {
+    console.error("Failed loading Drift stream:", error);
+  }
+}
+
+function getCurrentItem() {
+  return items[currentIndex];
+}
+
+function saveFavorites() {
+  localStorage.setItem(
+    "driftFavorites",
+    JSON.stringify(favorites)
+  );
+}
+
+function isFavorite(itemId) {
+  return favorites.includes(itemId);
+}
+
+function toggleFavorite() {
+  const item = getCurrentItem();
+
+  if (!item) return;
+
+  if (isFavorite(item.id)) {
+    favorites = favorites.filter((id) => id !== item.id);
+  } else {
+    favorites.push(item.id);
+  }
+
+  saveFavorites();
+  renderFavoriteButton(item);
+}
+
+function renderFavoriteButton(item) {
+  const favoriteBtn =
+    document.getElementById("favoriteBtn");
+
+  if (isFavorite(item.id)) {
+    favoriteBtn.textContent = "♥";
+    favoriteBtn.classList.add("is-active");
+    favoriteBtn.setAttribute("data-tip", "Remove favorite");
+  } else {
+    favoriteBtn.textContent = "♡";
+    favoriteBtn.classList.remove("is-active");
+    favoriteBtn.setAttribute("data-tip", "Favorite");
+  }
+}
+
+function renderItem(animate = true) {
+  const item = getCurrentItem();
+
+  if (!item) return;
+
+  const mainImage =
+    document.getElementById("mainImage");
+
+  const mediaLink =
+    document.getElementById("mediaLink");
+
+  if (animate) {
+    mainImage.classList.add("is-fading");
+
+    setTimeout(() => {
+      updateContent(item);
+      mainImage.classList.remove("is-fading");
+    }, 220);
+  } else {
+    updateContent(item);
+  }
+
+  function updateContent(item) {
+    mainImage.src = item.mediaUrl;
+    mainImage.alt = item.title;
+
+    mediaLink.href = item.originalUrl;
+
+    document.getElementById("sourceLink").href =
+      item.originalUrl;
+
+    document.getElementById("mediaType").textContent =
+      item.type;
+
+    document.getElementById("itemTitle").textContent =
+      item.title;
+
+    document.getElementById("itemYear").textContent =
+      item.year || "—";
+
+    document.getElementById("sourceIcon").textContent =
+      item.sourceName.charAt(0);
+
+    document.getElementById("sourceName").textContent =
+      item.sourceName;
+
+    document.getElementById("sourceAuthor").textContent =
+      `By ${item.authorName}`;
+
+    document.getElementById("authorLink").href =
+      item.authorUrl;
+
+    document.getElementById("licenseName").textContent =
+      item.licenseName;
+
+    document.getElementById("licenseLink").href =
+      item.licenseUrl;
+
+    renderTags(item);
+    renderDetails(item);
+    renderFavoriteButton(item);
+  }
+}
+
+function renderTags(item) {
+  const tags =
+    document.getElementById("tags");
+
+  tags.innerHTML = "";
+
+  item.tags.forEach((tag) => {
+    const tagElement =
+      document.createElement("div");
+
+    tagElement.className = "tag";
+    tagElement.textContent = tag;
+
+    tags.appendChild(tagElement);
+  });
+
+  const addTag =
+    document.createElement("div");
+
+  addTag.className = "tag";
+  addTag.textContent = "+";
+
+  tags.appendChild(addTag);
+}
+
+function renderDetails(item) {
+  const details =
+    document.getElementById("details");
+
+  details.innerHTML = "";
+
+  item.details.forEach((detail) => {
+    const detailElement =
+      document.createElement("div");
+
+    detailElement.className = "detail";
+    detailElement.textContent = detail;
+
+    details.appendChild(detailElement);
+  });
+}
+
+function renderMoreLikeThis() {
+  const moreRow =
+    document.getElementById("moreRow");
+
+  moreRow.innerHTML = "";
+
+  items.slice(0, 10).forEach((item, index) => {
+    const thumb =
+      document.createElement("div");
+
+    thumb.className = "thumb";
+
+    thumb.innerHTML = `
+      <img src="${item.mediaUrl}" alt="${item.title}">
+    `;
+
+    thumb.addEventListener("click", () => {
+      currentIndex = index;
+      renderItem(true);
+      resetAutoplayTimer();
+    });
+
+    moreRow.appendChild(thumb);
+  });
+}
+
+function nextItem() {
+  if (isTransitioning) return;
+
+  isTransitioning = true;
+
+  currentIndex++;
+
+  if (currentIndex >= items.length) {
+    currentIndex = 0;
+  }
+
+  renderItem(true);
+
+  setTimeout(() => {
+    isTransitioning = false;
+  }, 450);
+}
+
+function previousItem() {
+  if (isTransitioning) return;
+
+  isTransitioning = true;
+
+  currentIndex--;
+
+  if (currentIndex < 0) {
+    currentIndex = items.length - 1;
+  }
+
+  renderItem(true);
+
+  setTimeout(() => {
+    isTransitioning = false;
+  }, 450);
+}
+
+function shuffleItem() {
+  if (items.length <= 1) return;
+
+  let randomIndex = currentIndex;
+
+  while (randomIndex === currentIndex) {
+    randomIndex =
+      Math.floor(Math.random() * items.length);
+  }
+
+  currentIndex = randomIndex;
+
+  renderItem(true);
+}
+
+function startAutoplay() {
+  stopAutoplay();
+
+  autoplayTimer = setInterval(() => {
+    nextItem();
+  }, AUTOPLAY_DELAY);
+}
+
+function stopAutoplay() {
+  if (autoplayTimer) {
+    clearInterval(autoplayTimer);
+    autoplayTimer = null;
+  }
+}
+
+function resetAutoplayTimer() {
+  if (autoplayEnabled) {
+    startAutoplay();
+  }
+}
+
+function toggleAutoplay() {
+  autoplayEnabled = !autoplayEnabled;
+
+  const autoplayToggle =
+    document.getElementById("autoplayToggle");
+
+  if (autoplayEnabled) {
+    autoplayToggle.classList.add("is-active");
+    startAutoplay();
+  } else {
+    autoplayToggle.classList.remove("is-active");
+    stopAutoplay();
+  }
+}
+
+document
+  .getElementById("nextBtn")
+  .addEventListener("click", () => {
+    nextItem();
+    resetAutoplayTimer();
+  });
+
+document
+  .getElementById("prevBtn")
+  .addEventListener("click", () => {
+    previousItem();
+    resetAutoplayTimer();
+  });
+
+document
+  .getElementById("shuffleBtn")
+  .addEventListener("click", () => {
+    shuffleItem();
+    resetAutoplayTimer();
+  });
+
+document
+  .getElementById("favoriteBtn")
+  .addEventListener("click", toggleFavorite);
+
+document
+  .getElementById("autoplayToggle")
+  .addEventListener("click", toggleAutoplay);
+
+document
+  .querySelectorAll(".filter")
+  .forEach((filterButton) => {
+    filterButton.addEventListener("click", () => {
+      document
+        .querySelectorAll(".filter")
+        .forEach((f) => {
+          f.classList.remove("active");
+        });
+
+      filterButton.classList.add("active");
+
+      const filter =
+        filterButton.dataset.filter;
+
+      loadItems(filter);
+      resetAutoplayTimer();
+    });
+  });
+
+document.addEventListener("keydown", (event) => {
+  if (
+    event.key.toLowerCase() === "n" ||
+    event.key === "ArrowRight"
+  ) {
+    nextItem();
+    resetAutoplayTimer();
+  }
+
+  if (event.key === "ArrowLeft") {
+    previousItem();
+    resetAutoplayTimer();
+  }
+
+  if (event.key.toLowerCase() === "f") {
+    toggleFavorite();
+  }
+
+  if (event.key.toLowerCase() === "a") {
+    toggleAutoplay();
+  }
+});
+
+loadItems();

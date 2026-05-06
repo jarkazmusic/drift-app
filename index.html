@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DRIFT</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div>
+        <div class="brand-row">
+          <img src="driftlogo.png" alt="Drift Logo" class="logo">
+        </div>
+
+        <p class="intro">
+          A curated stream of vintage images and videos from across the web.
+        </p>
+
+        <nav class="nav">
+          <div class="nav-item active"><span class="icon">〰</span> Stream</div>
+          <div class="nav-item"><span class="icon">▦</span> Boards</div>
+          <div class="nav-item"><span class="icon">♡</span> Favorites</div>
+          <div class="nav-item"><span class="icon">◷</span> History</div>
+        </nav>
+
+        <div class="section-label">Vibe Filter</div>
+
+        <div class="filters">
+          <div class="filter active" data-filter="all"><span class="filter-dot"></span>All</div>
+          <div class="filter" data-filter="analog"><span class="filter-dot"></span>Analog</div>
+          <div class="filter" data-filter="landscape"><span class="filter-dot"></span>Landscape</div>
+          <div class="filter" data-filter="city"><span class="filter-dot"></span>City</div>
+          <div class="filter" data-filter="people"><span class="filter-dot"></span>People</div>
+          <div class="filter" data-filter="still-life"><span class="filter-dot"></span>Still Life</div>
+          <div class="filter" data-filter="video"><span class="filter-dot"></span>Video</div>
+        </div>
+      </div>
+
+      <div class="user-card">
+        <div class="user-left">
+          <div class="avatar"></div>
+          <div>
+            <div style="color:var(--text)">Drifter</div>
+            <div>Local Prototype</div>
+          </div>
+        </div>
+        <div>⌄</div>
+      </div>
+    </aside>
+
+    <section class="content">
+      <div class="topbar">
+        <div class="status"><span class="wave">〰</span> Now drifting</div>
+
+        <div class="top-actions">
+          <button class="autoplay-toggle" id="autoplayToggle">
+            <span class="toggle-dot"></span>
+            Ambient
+          </button>
+
+          <div class="top-action tooltip" data-tip="Search later">⌕</div>
+          <div class="top-action tooltip" data-tip="Grid view later">▦</div>
+        </div>
+      </div>
+
+      <div class="hero-wrap">
+        <div class="hero">
+          <a id="mediaLink" href="#" target="_blank">
+            <img id="mainImage" src="" alt="" />
+          </a>
+
+          <div class="media-pill" id="mediaType">Image</div>
+
+          <a class="view-original tooltip" id="sourceLink" href="#" target="_blank" data-tip="Open original source">
+            View original ↗
+          </a>
+
+          <div class="floating-actions">
+            <button class="round tooltip" id="favoriteBtn" data-tip="Favorite">♡</button>
+            <button class="round primary tooltip" id="saveBtn" data-tip="Save to board">▱</button>
+          </div>
+        </div>
+
+        <div class="transport">
+          <button class="control-circle tooltip" id="prevBtn" data-tip="Previous">←</button>
+          <button class="main-next" id="nextBtn">Next →</button>
+          <button class="control-circle tooltip" id="shuffleBtn" data-tip="Shuffle mood">⌘</button>
+        </div>
+
+        <div class="hint">
+          Press <span class="kbd">N</span> next · <span class="kbd">F</span> favorite · <span class="kbd">A</span> ambient
+        </div>
+
+        <div class="more">
+          <div class="section-label">More like this</div>
+          <div class="more-row" id="moreRow"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="inspector">
+      <div class="section-label">About this item</div>
+
+      <div class="title-row">
+        <div>
+          <h2 id="itemTitle">Loading...</h2>
+        </div>
+        <div class="year" id="itemYear">—</div>
+      </div>
+
+      <div class="tags" id="tags"></div>
+
+      <div class="divider"></div>
+
+      <div class="info-block">
+        <div class="info-title">Source</div>
+
+        <a class="source-card" id="authorLink" href="#" target="_blank">
+          <div class="source-icon" id="sourceIcon">?</div>
+          <div>
+            <div class="source-main" id="sourceName">Source</div>
+            <div class="source-sub" id="sourceAuthor">Creator</div>
+          </div>
+          <div>↗</div>
+        </a>
+      </div>
+
+      <div class="info-block">
+        <div class="info-title">License</div>
+        <div class="source-main" id="licenseName">License</div>
+        <a class="source-sub" id="licenseLink" href="#" target="_blank">View license ↗</a>
+      </div>
+
+      <div class="info-block">
+        <div class="info-title">Details</div>
+        <div class="detail-list" id="details"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="info-block">
+        <div class="info-title">
+          Save to board
+          <span class="new-board">+ New Board</span>
+        </div>
+
+        <div class="boards">
+          <div class="board">
+            <div class="board-thumb"></div>
+            <span>Tycho Vibes</span>
+            <span class="count">0</span>
+            <span>▱</span>
+          </div>
+
+          <div class="board">
+            <div class="board-thumb"></div>
+            <span>Boards of Canada</span>
+            <span class="count">0</span>
+            <span>▱</span>
+          </div>
+
+          <div class="board">
+            <div class="board-thumb"></div>
+            <span>Faded Landscapes</span>
+            <span class="count">0</span>
+            <span>▱</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="upgrade">
+        <div class="upgrade-title">▣ Unlock unlimited drifting</div>
+        <p>Later: private boards, extended history, saved streams and custom vibe channels.</p>
+        <button>Upgrade later</button>
+      </div>
+    </aside>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

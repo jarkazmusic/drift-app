@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "title": "Coastal drive",
+    "type": "image",
+    "mediaUrl": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1700&q=80",
+    "originalUrl": "https://unsplash.com",
+    "authorName": "Unknown Unsplash Creator",
+    "authorUrl": "https://unsplash.com",
+    "sourceName": "Unsplash",
+    "licenseName": "Unsplash License",
+    "tags": ["coast", "film", "road trip"]
+  },
+  {
+    "id": "2",
+    "title": "Warm horizon",
+    "type": "image",
+    "mediaUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1700&q=80",
+    "originalUrl": "https://unsplash.com",
+    "authorName": "Unknown Unsplash Creator",
+    "authorUrl": "https://unsplash.com",
+    "sourceName": "Unsplash",
+    "licenseName": "Unsplash License",
+    "tags": ["ocean", "dreamy", "analog"]
+  }
+]
