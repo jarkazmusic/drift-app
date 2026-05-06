@@ -104,14 +104,18 @@ button {
 }
 .logo {
   width: 110px;
+
   height: auto;
+
   object-fit: contain;
+
   display: block;
+
   opacity: .85;
+
   filter:
-    brightness(0) saturate(100%)
-    invert(93%) sepia(10%) saturate(300%)
-    hue-rotate(5deg) brightness(98%);
+    drop-shadow(0 0 18px rgba(255,255,255,.035));
+
   transition:
     opacity .25s ease,
     transform .25s ease;
@@ -232,10 +236,11 @@ button {
 }
 
 .user-card {
-  position: absolute;
-  left: 28px;
-  right: 28px;
-  bottom: 28px;
+  position: relative;
+  left: unset;
+  right: unset;
+  bottom: unset;
+  margin-top: 24px;
   padding-top: 22px;
   border-top: 1px solid var(--line);
   display: flex;
@@ -879,17 +884,25 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .sidebar {
-    position: relative;
-    height: auto;
-    border-right: 0;
-    padding-bottom: 0;
-  }
+ .sidebar {
+    border-right: 1px solid var(--line);
+    padding-bottom: 32px;
+}
 
   .user-card {
-    position: static;
-    margin-top: 28px;
-  }
+  position: relative;
+  left: unset;
+  right: unset;
+  bottom: unset;
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 13px;
+}
 
   .content {
     padding-top: 18px;
