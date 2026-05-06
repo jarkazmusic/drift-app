@@ -77,7 +77,7 @@ button { font: inherit; }
   height: auto;
   display: block;
   opacity: .85;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   filter:
     brightness(0) saturate(100%)
     invert(93%) sepia(10%) saturate(300%)
