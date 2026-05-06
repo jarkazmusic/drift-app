@@ -74,56 +74,34 @@ async function loadItems(filter = "all") {
   try {
     currentFilter = filter;
 
-    const filterQueries = FILTERS[filter];
+    if (filter === "video") {
+      await loadPexelsVideos();
+      return;
+    }
 
-    const randomQuery =
-      filterQueries[
-        Math.floor(Math.random() * filterQueries.length)
-      ];
+    const filterQueries = FILTERS[filter];
+    const randomQuery = filterQueries[Math.floor(Math.random() * filterQueries.length)];
 
     const response = await fetch(
       `https://api.unsplash.com/search/photos?query=${encodeURIComponent(randomQuery)}&per_page=18&orientation=landscape`,
-      {
-        headers: {
-          Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`
-        }
-      }
+      { headers: { Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}` } }
     );
 
     const data = await response.json();
 
     items = data.results.map((photo) => ({
       id: photo.id,
-
-      title:
-        photo.alt_description ||
-        photo.description ||
-        "Untitled Drift",
-
+      title: photo.alt_description || photo.description || "Untitled Drift",
       type: "image",
-
       mediaUrl: photo.urls.regular,
-
       originalUrl: photo.links.html,
-
       authorName: photo.user.name,
-
       authorUrl: photo.user.links.html,
-
       sourceName: "Unsplash",
-
       licenseName: "Unsplash License",
-
       licenseUrl: "https://unsplash.com/license",
-
-      year:
-        photo.created_at
-          ? new Date(photo.created_at).getFullYear()
-          : "—",
-
-      tags:
-        photo.tags?.slice(0, 5).map((tag) => tag.title) || [],
-
+      year: photo.created_at ? new Date(photo.created_at).getFullYear() : "—",
+      tags: photo.tags?.slice(0, 5).map((tag) => tag.title) || [],
       details: [
         `◌ Curated via ${randomQuery}`,
         "▣ External source linked",
@@ -132,12 +110,55 @@ async function loadItems(filter = "all") {
     }));
 
     currentIndex = 0;
-
     renderItem(false);
     renderMoreLikeThis();
 
   } catch (error) {
     console.error("Failed loading Drift stream:", error);
+  }
+}
+
+async function loadPexelsVideos() {
+  try {
+    const queries = ["analog nature", "cinematic landscape", "dreamy fog", "ambient loop", "misty forest"];
+    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+
+    const response = await fetch(
+      `https://api.pexels.com/videos/search?query=${encodeURIComponent(randomQuery)}&per_page=18&orientation=landscape`,
+      { headers: { Authorization: PEXELS_API_KEY } }
+    );
+
+    const data = await response.json();
+
+    items = data.videos.map((video) => {
+      const file = video.video_files.find(f => f.quality === "hd") || video.video_files[0];
+      return {
+        id: String(video.id),
+        title: video.url.split("/").filter(Boolean).pop() || "Untitled Drift",
+        type: "video",
+        mediaUrl: file.link,
+        originalUrl: video.url,
+        authorName: video.user.name,
+        authorUrl: video.user.url,
+        sourceName: "Pexels",
+        licenseName: "Pexels License",
+        licenseUrl: "https://www.pexels.com/license/",
+        year: new Date(video.created_at || Date.now()).getFullYear(),
+        tags: [],
+        details: [
+          "◌ Ambient video loop",
+          "▣ External source linked",
+          "⌖ Creator credited"
+        ]
+      };
+    });
+
+    currentIndex = 0;
+    renderItem(false);
+    renderMoreLikeThis();
+
+  } catch (error) {
+    console.error("Failed loading Pexels videos:", error);
   }
 }
 
@@ -209,45 +230,38 @@ function renderItem(animate = true) {
   }
 
   function updateContent(item) {
+  const mainImage = document.getElementById("mainImage");
+  const mainVideo = document.getElementById("mainVideo");
+
+  if (item.type === "video") {
+    mainImage.style.display = "none";
+    mainVideo.style.display = "block";
+    mainVideo.src = item.mediaUrl;
+    mainVideo.play();
+  } else {
+    mainVideo.style.display = "none";
+    mainVideo.src = "";
+    mainImage.style.display = "block";
     mainImage.src = item.mediaUrl;
     mainImage.alt = item.title;
-
-    mediaLink.href = item.originalUrl;
-
-    document.getElementById("sourceLink").href =
-      item.originalUrl;
-
-    document.getElementById("mediaType").textContent =
-      item.type;
-
-    document.getElementById("itemTitle").textContent =
-      item.title;
-
-    document.getElementById("itemYear").textContent =
-      item.year || "—";
-
-    document.getElementById("sourceIcon").textContent =
-      item.sourceName.charAt(0);
-
-    document.getElementById("sourceName").textContent =
-      item.sourceName;
-
-    document.getElementById("sourceAuthor").textContent =
-      `By ${item.authorName}`;
-
-    document.getElementById("authorLink").href =
-      item.authorUrl;
-
-    document.getElementById("licenseName").textContent =
-      item.licenseName;
-
-    document.getElementById("licenseLink").href =
-      item.licenseUrl;
-
-    renderTags(item);
-    renderDetails(item);
-    renderFavoriteButton(item);
   }
+
+  document.getElementById("mediaLink").href = item.originalUrl;
+  document.getElementById("sourceLink").href = item.originalUrl;
+  document.getElementById("mediaType").textContent = item.type === "video" ? "Video" : "Image";
+  document.getElementById("itemTitle").textContent = item.title;
+  document.getElementById("itemYear").textContent = item.year || "—";
+  document.getElementById("sourceIcon").textContent = item.sourceName.charAt(0);
+  document.getElementById("sourceName").textContent = item.sourceName;
+  document.getElementById("sourceAuthor").textContent = `By ${item.authorName}`;
+  document.getElementById("authorLink").href = item.authorUrl;
+  document.getElementById("licenseName").textContent = item.licenseName;
+  document.getElementById("licenseLink").href = item.licenseUrl;
+
+  renderTags(item);
+  renderDetails(item);
+  renderFavoriteButton(item);
+}
 }
 
 function renderTags(item) {
