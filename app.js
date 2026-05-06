@@ -67,7 +67,14 @@ const FILTERS = {
     "nostalgic room",
     "old camera still life",
     "retro interior"
-  ]
+  ],
+  video: [
+  "cinematic nature",
+  "ambient landscape",
+  "dreamy fog",
+  "misty forest",
+  "analog motion"
+]
 };
 
 async function loadItems(filter = "all") {
