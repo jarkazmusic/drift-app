@@ -49,14 +49,11 @@
         <img src="driftlogo.png" alt="Drift" class="logo-mobile">
         <button class="drawer-close" id="drawerClose">✕</button>
       </div>
-
       <div class="media-toggle">
         <div class="media-toggle-btn active" data-mode="images">⬡ Images</div>
         <div class="media-toggle-btn" data-mode="video">▶ Video</div>
       </div>
-
       <div class="section-label" style="margin-top: 20px;">Mood Channel</div>
-
       <div class="filters">
         <div class="filter active" data-filter="all"><span class="filter-dot"></span>All Drifts</div>
         <div class="filter" data-filter="vhs-summer"><span class="filter-dot"></span>VHS Summer</div>
@@ -66,7 +63,6 @@
         <div class="filter" data-filter="analog-dreams"><span class="filter-dot"></span>Analog Dreams</div>
         <div class="filter" data-filter="still-world"><span class="filter-dot"></span>Still World</div>
       </div>
-
       <div class="drawer-bottom">
         <button class="autoplay-toggle" id="autoplayToggleMobile">
           <span class="toggle-dot"></span>
@@ -86,10 +82,10 @@
     <section class="content">
       <div class="hero-wrap">
         <div class="hero">
-          <a id="mediaLink" href="#" target="_blank">
+          <div id="mediaLink" class="media-click">
             <img id="mainImage" src="" alt="" />
             <video id="mainVideo" autoplay muted loop playsinline style="display:none; width:100%; height:100%; object-fit:cover;"></video>
-          </a>
+          </div>
           <div class="media-pill" id="mediaType">Image</div>
           <a class="view-original tooltip" id="sourceLink" href="#" target="_blank" data-tip="Open original source">
             View original ↗
@@ -179,6 +175,22 @@
       </div>
     </aside>
 
+  </div>
+
+  <!-- FULLSCREEN OVERLAY -->
+  <div class="fullscreen-overlay" id="fullscreenOverlay">
+    <div class="fs-media">
+      <img id="fsImage" src="" alt="" />
+      <video id="fsVideo" autoplay muted loop playsinline style="display:none;"></video>
+    </div>
+    <div class="fs-controls">
+      <button class="fs-btn" id="fsPrevBtn">←</button>
+      <button class="fs-btn" id="fsFavoriteBtn">♡</button>
+      <button class="fs-btn fs-ambient" id="fsAmbientBtn"><span class="toggle-dot"></span> Ambient</button>
+      <a class="fs-btn fs-source" id="fsSourceLink" href="#" target="_blank">View Original ↗</a>
+      <button class="fs-btn" id="fsNextBtn">→</button>
+    </div>
+    <button class="fs-close" id="fsClose">✕</button>
   </div>
 
   <script src="config.js"></script>

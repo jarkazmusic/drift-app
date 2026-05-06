@@ -207,7 +207,6 @@ button { font: inherit; }
   cursor: pointer;
   transition: .18s ease;
   font-size: 12px;
-  position: relative;
 }
 
 .autoplay-toggle:hover {
@@ -220,6 +219,7 @@ button { font: inherit; }
   color: var(--cream);
   border-color: rgba(207,169,120,.4);
   background: rgba(207,169,120,.12);
+  animation: pulse-ring 2s ease-out infinite;
 }
 
 .toggle-dot {
@@ -239,10 +239,6 @@ button { font: inherit; }
   0% { box-shadow: 0 0 0 0 rgba(207,169,120,.5); }
   70% { box-shadow: 0 0 0 8px rgba(207,169,120,0); }
   100% { box-shadow: 0 0 0 0 rgba(207,169,120,0); }
-}
-
-.autoplay-toggle.is-active {
-  animation: pulse-ring 2s ease-out infinite;
 }
 
 .ambient-hint {
@@ -292,10 +288,11 @@ button { font: inherit; }
   border: 1px solid rgba(238,230,216,.13);
 }
 
-#mediaLink {
+.media-click {
   display: block;
   width: 100%;
   height: 100%;
+  cursor: zoom-in;
 }
 
 .hero img {
@@ -722,7 +719,117 @@ button { font: inherit; }
   box-shadow: 0 10px 30px rgba(0,0,0,.4);
 }
 
-/* RESPONSIVE */
+/* FULLSCREEN OVERLAY */
+
+.fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #0a0907;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .4s ease;
+}
+
+.fullscreen-overlay.is-open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.fs-media {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.fs-media img,
+.fs-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: sepia(.2) saturate(.8) contrast(.92) brightness(.9);
+}
+
+.fs-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 24px;
+  background: rgba(10,9,7,.8);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.fs-btn {
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  font-size: 15px;
+  cursor: pointer;
+  transition: .18s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.fs-btn:hover {
+  background: rgba(255,255,255,.1);
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.fs-ambient.is-active {
+  color: var(--cream);
+  border-color: rgba(207,169,120,.4);
+  background: rgba(207,169,120,.12);
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+.fs-source {
+  background: rgba(239,226,207,.85);
+  color: #0f0d0a;
+  border-color: transparent;
+}
+
+.fs-source:hover {
+  background: var(--cream);
+  color: #0f0d0a;
+}
+
+.fs-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(10,9,7,.6);
+  backdrop-filter: blur(10px);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: .18s ease;
+  z-index: 10;
+}
+
+.fs-close:hover {
+  background: rgba(255,255,255,.12);
+  border-color: var(--line-strong);
+}
+
+/* MOBILE DRAWER */
 
 @media (max-width: 1100px) {
   .app {
@@ -849,9 +956,7 @@ button { font: inherit; }
     color: var(--text);
   }
 
-  .mobile-drawer .filters {
-    flex-direction: column;
-  }
+  .mobile-drawer .filters { flex-direction: column; }
 
   .mobile-drawer .filter {
     height: 44px;
@@ -864,10 +969,7 @@ button { font: inherit; }
     height: 9px;
   }
 
-  .mobile-drawer .media-toggle {
-    gap: 8px;
-    margin-bottom: 4px;
-  }
+  .mobile-drawer .media-toggle { gap: 8px; margin-bottom: 4px; }
 
   .mobile-drawer .media-toggle-btn {
     height: 38px;
@@ -888,11 +990,24 @@ button { font: inherit; }
 
   .content { padding: 16px; }
   .hero { aspect-ratio: 4/3; border-radius: 12px; }
+
   .transport {
     grid-template-columns: 54px 1fr 54px;
     max-width: 100%;
     margin: 20px 0 16px;
   }
+
   .more-row { grid-template-columns: repeat(2, 1fr); }
   .hint { display: none; }
+
+  .fs-controls {
+    gap: 8px;
+    padding: 16px 12px;
+  }
+
+  .fs-btn {
+    height: 40px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
 }
