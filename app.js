@@ -19,7 +19,8 @@ const FILTERS = {
   "late-night": ["night city rain", "neon reflection", "late night diner", "dark urban cinematic", "city lights fog"],
   "winter-static": ["winter fog", "snow silence", "frozen landscape", "grey winter road", "cold analog"],
   "analog-dreams": ["kodak film grain", "analog photography", "vhs aesthetic", "expired film", "lomography"],
-  "still-world": ["vintage objects", "analog desk", "nostalgic room", "old camera still life", "retro interior"]
+  "still-world": ["vintage objects", "analog desk", "nostalgic room", "old camera still life", "retro interior"],
+  "flowers-nature": ["wildflowers analog", "botanical film", "dreamy flowers", "nature close up film", "vintage garden"]
 };
 
 const VIDEO_QUERIES = {
@@ -29,7 +30,8 @@ const VIDEO_QUERIES = {
   "late-night": ["night city rain", "neon lights city", "rainy street night", "dark urban", "city fog night"],
   "winter-static": ["snow falling forest", "winter fog landscape", "frozen lake", "snowy road", "grey winter sky"],
   "analog-dreams": ["film grain texture", "vintage super8", "old film footage", "analog home video", "retro footage"],
-  "still-world": ["cozy room ambient", "candle light interior", "vintage objects table", "slow morning coffee", "quiet interior"]
+  "still-world": ["cozy room ambient", "candle light interior", "vintage objects table", "slow morning coffee", "quiet interior"],
+  "flowers-nature": ["flowers slow motion", "nature macro video", "blooming flowers", "forest ambient", "botanical garden"]
 };
 
 async function loadItems(filter = "all") {
@@ -39,30 +41,54 @@ async function loadItems(filter = "all") {
 
     const filterQueries = FILTERS[filter];
     const randomQuery = filterQueries[Math.floor(Math.random() * filterQueries.length)];
+    const randomPage = Math.floor(Math.random() * 8) + 1;
+    const useUnsplash = Math.random() > 0.4;
 
-    const response = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(randomQuery)}&per_page=18&orientation=landscape`,
-      { headers: { Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}` } }
-    );
-
-    const data = await response.json();
-
-    items = data.results.map((photo) => ({
-      id: photo.id,
-      title: photo.alt_description || photo.description || "Untitled Drift",
-      type: "image",
-      mediaUrl: photo.urls.regular,
-      thumbUrl: photo.urls.small,
-      originalUrl: photo.links.html,
-      authorName: photo.user.name,
-      authorUrl: photo.user.links.html,
-      sourceName: "Unsplash",
-      licenseName: "Unsplash License",
-      licenseUrl: "https://unsplash.com/license",
-      year: photo.created_at ? new Date(photo.created_at).getFullYear() : "—",
-      tags: photo.tags?.slice(0, 5).map((tag) => tag.title) || [],
-      details: [`◌ Curated via ${randomQuery}`, "▣ External source linked", "⌖ Creator credited"]
-    }));
+    if (useUnsplash) {
+      const response = await fetch(
+        `https://api.unsplash.com/search/photos?query=${encodeURIComponent(randomQuery)}&per_page=18&page=${randomPage}&orientation=landscape`,
+        { headers: { Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}` } }
+      );
+      const data = await response.json();
+      items = data.results.map((photo) => ({
+        id: photo.id,
+        title: photo.alt_description || photo.description || "Untitled Drift",
+        type: "image",
+        mediaUrl: photo.urls.regular,
+        thumbUrl: photo.urls.small,
+        originalUrl: photo.links.html,
+        authorName: photo.user.name,
+        authorUrl: photo.user.links.html,
+        sourceName: "Unsplash",
+        licenseName: "Unsplash License",
+        licenseUrl: "https://unsplash.com/license",
+        year: photo.created_at ? new Date(photo.created_at).getFullYear() : "—",
+        tags: photo.tags?.slice(0, 5).map((tag) => tag.title) || [],
+        details: [`◌ Curated via ${randomQuery}`, "▣ External source linked", "⌖ Creator credited"]
+      }));
+    } else {
+      const response = await fetch(
+        `https://api.pexels.com/v1/search?query=${encodeURIComponent(randomQuery)}&per_page=18&page=${randomPage}&orientation=landscape`,
+        { headers: { Authorization: PEXELS_API_KEY } }
+      );
+      const data = await response.json();
+      items = data.photos.map((photo) => ({
+        id: String(photo.id),
+        title: photo.alt || "Untitled Drift",
+        type: "image",
+        mediaUrl: photo.src.large,
+        thumbUrl: photo.src.medium,
+        originalUrl: photo.url,
+        authorName: photo.photographer,
+        authorUrl: photo.photographer_url,
+        sourceName: "Pexels",
+        licenseName: "Pexels License",
+        licenseUrl: "https://www.pexels.com/license/",
+        year: "—",
+        tags: [],
+        details: [`◌ Curated via ${randomQuery}`, "▣ External source linked", "⌖ Creator credited"]
+      }));
+    }
 
     currentIndex = 0;
     renderItem(false);
@@ -74,12 +100,12 @@ async function loadPexelsVideos(filter = "all") {
   try {
     const queries = VIDEO_QUERIES[filter] || VIDEO_QUERIES.all;
     const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+    const randomPage = Math.floor(Math.random() * 5) + 1;
 
     const response = await fetch(
-      `https://api.pexels.com/videos/search?query=${encodeURIComponent(randomQuery)}&per_page=18&orientation=landscape`,
+      `https://api.pexels.com/videos/search?query=${encodeURIComponent(randomQuery)}&per_page=18&page=${randomPage}&orientation=landscape`,
       { headers: { Authorization: PEXELS_API_KEY } }
     );
-
     const data = await response.json();
 
     items = data.videos.map((video) => {
@@ -344,9 +370,7 @@ document.getElementById("prevBtn").addEventListener("click", () => { previousIte
 document.getElementById("shuffleBtn").addEventListener("click", () => { shuffleItem(); resetAutoplayTimer(); });
 document.getElementById("favoriteBtn").addEventListener("click", toggleFavorite);
 document.getElementById("autoplayToggle").addEventListener("click", toggleAutoplay);
-
 document.getElementById("mediaLink").addEventListener("click", openFullscreen);
-
 document.getElementById("fsClose").addEventListener("click", closeFullscreen);
 document.getElementById("fsNextBtn").addEventListener("click", () => { nextItem(); resetAutoplayTimer(); });
 document.getElementById("fsPrevBtn").addEventListener("click", () => { previousItem(); resetAutoplayTimer(); });
