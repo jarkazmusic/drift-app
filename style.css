@@ -104,18 +104,14 @@ button {
 }
 .logo {
   width: 110px;
-
   height: auto;
-
   object-fit: contain;
-
   display: block;
-
   opacity: .85;
-
   filter:
-    drop-shadow(0 0 18px rgba(255,255,255,.035));
-
+    brightness(0) saturate(100%)
+    invert(93%) sepia(10%) saturate(300%)
+    hue-rotate(5deg) brightness(98%);
   transition:
     opacity .25s ease,
     transform .25s ease;
