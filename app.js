@@ -352,5 +352,44 @@ document.addEventListener("keydown", (event) => {
   if (event.key.toLowerCase() === "f") toggleFavorite();
   if (event.key.toLowerCase() === "a") toggleAutoplay();
 });
+const hamburgerBtn = document.getElementById("hamburgerBtn");
+const mobileDrawer = document.getElementById("mobileDrawer");
+const drawerOverlay = document.getElementById("drawerOverlay");
+const drawerClose = document.getElementById("drawerClose");
+
+function openDrawer() {
+  mobileDrawer.classList.add("is-open");
+  drawerOverlay.classList.add("is-open");
+}
+
+function closeDrawer() {
+  mobileDrawer.classList.remove("is-open");
+  drawerOverlay.classList.remove("is-open");
+}
+
+if (hamburgerBtn) hamburgerBtn.addEventListener("click", openDrawer);
+if (drawerClose) drawerClose.addEventListener("click", closeDrawer);
+if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
+
+document.querySelectorAll(".mobile-drawer .filter").forEach((filterButton) => {
+  filterButton.addEventListener("click", () => {
+    document.querySelectorAll(".filter").forEach((f) => f.classList.remove("active"));
+    filterButton.classList.add("active");
+    const label = filterButton.textContent.trim();
+    const mobileLabel = document.getElementById("mobileCurrentFilter");
+    if (mobileLabel) mobileLabel.textContent = label;
+    loadItems(filterButton.dataset.filter);
+    resetAutoplayTimer();
+    closeDrawer();
+  });
+});
+
+const autoplayToggleMobile = document.getElementById("autoplayToggleMobile");
+if (autoplayToggleMobile) {
+  autoplayToggleMobile.addEventListener("click", () => {
+    toggleAutoplay();
+    autoplayToggleMobile.classList.toggle("is-active", autoplayEnabled);
+  });
+}
 
 loadItems();
