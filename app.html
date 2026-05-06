@@ -10,17 +10,45 @@
 <body>
   <div class="app">
 
-    <header class="header">
+    <div class="floating-panel">
       <a href="index.html">
         <img src="driftlogo.png" alt="Drift" class="logo">
       </a>
 
-      <div class="header-filters">
+      <div class="media-toggle">
+        <div class="media-toggle-btn active" data-mode="images">⬡ Images</div>
+        <div class="media-toggle-btn" data-mode="video">▶ Video</div>
+      </div>
+
+      <div class="section-label" style="margin-top: 20px;">Mood</div>
+
+      <div class="filters">
+        <div class="filter active" data-filter="all"><span class="filter-dot"></span>All</div>
+        <div class="filter" data-filter="vhs-summer"><span class="filter-dot"></span>VHS Summer</div>
+        <div class="filter" data-filter="empty-roads"><span class="filter-dot"></span>Empty Roads</div>
+        <div class="filter" data-filter="late-night"><span class="filter-dot"></span>Late Night</div>
+        <div class="filter" data-filter="winter-static"><span class="filter-dot"></span>Winter Static</div>
+        <div class="filter" data-filter="analog-dreams"><span class="filter-dot"></span>Analog Dreams</div>
+        <div class="filter" data-filter="still-world"><span class="filter-dot"></span>Still World</div>
+      </div>
+
+      <div class="panel-bottom">
+        <button class="autoplay-toggle" id="autoplayToggle">
+          <span class="toggle-dot"></span>
+          Ambient
+        </button>
+      </div>
+    </div>
+
+    <div class="mobile-bar">
+      <a href="index.html">
+        <img src="driftlogo.png" alt="Drift" class="logo-mobile">
+      </a>
+      <div class="mobile-filters">
         <div class="media-toggle">
           <div class="media-toggle-btn active" data-mode="images">⬡ Images</div>
           <div class="media-toggle-btn" data-mode="video">▶ Video</div>
         </div>
-
         <div class="filters">
           <div class="filter active" data-filter="all"><span class="filter-dot"></span>All</div>
           <div class="filter" data-filter="vhs-summer"><span class="filter-dot"></span>VHS Summer</div>
@@ -31,14 +59,11 @@
           <div class="filter" data-filter="still-world"><span class="filter-dot"></span>Still World</div>
         </div>
       </div>
-
-      <div class="header-actions">
-        <button class="autoplay-toggle" id="autoplayToggle">
-          <span class="toggle-dot"></span>
-          Ambient
-        </button>
-      </div>
-    </header>
+      <button class="autoplay-toggle" id="autoplayToggleMobile">
+        <span class="toggle-dot"></span>
+        Ambient
+      </button>
+    </div>
 
     <section class="content">
       <div class="hero-wrap">
@@ -47,13 +72,10 @@
             <img id="mainImage" src="" alt="" />
             <video id="mainVideo" autoplay muted loop playsinline style="display:none; width:100%; height:100%; object-fit:cover;"></video>
           </a>
-
           <div class="media-pill" id="mediaType">Image</div>
-
           <a class="view-original tooltip" id="sourceLink" href="#" target="_blank" data-tip="Open original source">
             View original ↗
           </a>
-
           <div class="floating-actions">
             <button class="round tooltip" id="favoriteBtn" data-tip="Favorite">♡</button>
             <button class="round primary tooltip" id="saveBtn" data-tip="Save to board">▱</button>
@@ -79,18 +101,12 @@
 
     <aside class="inspector">
       <div class="section-label">About this item</div>
-
       <div class="title-row">
-        <div>
-          <h2 id="itemTitle">Loading...</h2>
-        </div>
+        <div><h2 id="itemTitle">Loading...</h2></div>
         <div class="year" id="itemYear">—</div>
       </div>
-
       <div class="tags" id="tags"></div>
-
       <div class="divider"></div>
-
       <div class="info-block">
         <div class="info-title">Source</div>
         <a class="source-card" id="authorLink" href="#" target="_blank">
@@ -102,20 +118,16 @@
           <div>↗</div>
         </a>
       </div>
-
       <div class="info-block">
         <div class="info-title">License</div>
         <div class="source-main" id="licenseName">License</div>
         <a class="source-sub" id="licenseLink" href="#" target="_blank">View license ↗</a>
       </div>
-
       <div class="info-block">
         <div class="info-title">Details</div>
         <div class="detail-list" id="details"></div>
       </div>
-
       <div class="divider"></div>
-
       <div class="info-block">
         <div class="info-title">
           Save to board
@@ -142,7 +154,6 @@
           </div>
         </div>
       </div>
-
       <div class="upgrade">
         <div class="upgrade-title">▣ Unlock unlimited drifting</div>
         <p>Later: private boards, extended history, saved streams and custom vibe channels.</p>
