@@ -62,7 +62,7 @@ body::before {
 }
 
 .nav-logo {
-  width: 90px;
+  width: 100px;
   height: auto;
   filter:
     brightness(0) saturate(100%)
