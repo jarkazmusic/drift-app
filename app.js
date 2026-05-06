@@ -2,10 +2,10 @@ let items = [];
 let currentIndex = 0;
 let isTransitioning = false;
 
-let favorites =
-  JSON.parse(localStorage.getItem("driftFavorites")) || [];
+let favorites = JSON.parse(localStorage.getItem("driftFavorites")) || [];
 
 let currentFilter = "all";
+let currentMode = "images";
 
 let autoplayEnabled = false;
 let autoplayTimer = null;
@@ -13,76 +13,31 @@ let autoplayTimer = null;
 const AUTOPLAY_DELAY = 15000;
 
 const FILTERS = {
-  all: [
-    "analog landscape",
-    "cinematic nostalgia",
-    "faded road",
-    "dreamy coast",
-    "vintage ocean"
-  ],
+  all: ["analog landscape", "cinematic nostalgia", "faded road", "dreamy coast", "vintage ocean"],
+  "vhs-summer": ["vhs summer", "analog beach", "kodak summer", "faded pool", "retro vacation"],
+  "empty-roads": ["empty highway", "lonely road fog", "misty road cinematic", "abandoned street", "road at dawn"],
+  "late-night": ["night city rain", "neon reflection", "late night diner", "dark urban cinematic", "city lights fog"],
+  "winter-static": ["winter fog", "snow silence", "frozen landscape", "grey winter road", "cold analog"],
+  "analog-dreams": ["kodak film grain", "analog photography", "vhs aesthetic", "expired film", "lomography"],
+  "still-world": ["vintage objects", "analog desk", "nostalgic room", "old camera still life", "retro interior"]
+};
 
-  "vhs-summer": [
-    "vhs summer",
-    "analog beach",
-    "kodak summer",
-    "faded pool",
-    "retro vacation"
-  ],
-
-  "empty-roads": [
-    "empty highway",
-    "lonely road fog",
-    "misty road cinematic",
-    "abandoned street",
-    "road at dawn"
-  ],
-
-  "late-night": [
-    "night city rain",
-    "neon reflection",
-    "late night diner",
-    "dark urban cinematic",
-    "city lights fog"
-  ],
-
-  "winter-static": [
-    "winter fog",
-    "snow silence",
-    "frozen landscape",
-    "grey winter road",
-    "cold analog"
-  ],
-
-  "analog-dreams": [
-    "kodak film grain",
-    "analog photography",
-    "vhs aesthetic",
-    "expired film",
-    "lomography"
-  ],
-
-  "still-world": [
-    "vintage objects",
-    "analog desk",
-    "nostalgic room",
-    "old camera still life",
-    "retro interior"
-  ],
-  video: [
-  "cinematic nature",
-  "ambient landscape",
-  "dreamy fog",
-  "misty forest",
-  "analog motion"
-]
+const VIDEO_QUERIES = {
+  all: ["cinematic landscape", "ambient nature", "dreamy fog", "misty forest", "analog motion"],
+  "vhs-summer": ["summer beach waves", "sunny road trip", "warm sunset ocean", "retro summer", "coastal drive"],
+  "empty-roads": ["empty highway driving", "foggy road", "lonely road night", "misty mountain road", "abandoned road"],
+  "late-night": ["night city rain", "neon lights city", "rainy street night", "dark urban", "city fog night"],
+  "winter-static": ["snow falling forest", "winter fog landscape", "frozen lake", "snowy road", "grey winter sky"],
+  "analog-dreams": ["film grain texture", "vintage super8", "old film footage", "analog home video", "retro footage"],
+  "still-world": ["cozy room ambient", "candle light interior", "vintage objects table", "slow morning coffee", "quiet interior"]
 };
 
 async function loadItems(filter = "all") {
   try {
     currentFilter = filter;
 
-    if (filter === "video") {
-      await loadPexelsVideos();
+    if (currentMode === "video") {
+      await loadPexelsVideos(filter);
       return;
     }
 
@@ -101,6 +56,7 @@ async function loadItems(filter = "all") {
       title: photo.alt_description || photo.description || "Untitled Drift",
       type: "image",
       mediaUrl: photo.urls.regular,
+      thumbUrl: photo.urls.small,
       originalUrl: photo.links.html,
       authorName: photo.user.name,
       authorUrl: photo.user.links.html,
@@ -125,9 +81,9 @@ async function loadItems(filter = "all") {
   }
 }
 
-async function loadPexelsVideos() {
+async function loadPexelsVideos(filter = "all") {
   try {
-    const queries = ["analog nature", "cinematic landscape", "dreamy fog", "ambient loop", "misty forest"];
+    const queries = VIDEO_QUERIES[filter] || VIDEO_QUERIES.all;
     const randomQuery = queries[Math.floor(Math.random() * queries.length)];
 
     const response = await fetch(
@@ -139,11 +95,13 @@ async function loadPexelsVideos() {
 
     items = data.videos.map((video) => {
       const file = video.video_files.find(f => f.quality === "hd") || video.video_files[0];
+      const thumb = video.video_pictures?.[0]?.picture || "";
       return {
         id: String(video.id),
-        title: video.url.split("/").filter(Boolean).pop() || "Untitled Drift",
+        title: randomQuery,
         type: "video",
         mediaUrl: file.link,
+        thumbUrl: thumb,
         originalUrl: video.url,
         authorName: video.user.name,
         authorUrl: video.user.url,
@@ -153,7 +111,7 @@ async function loadPexelsVideos() {
         year: new Date(video.created_at || Date.now()).getFullYear(),
         tags: [],
         details: [
-          "◌ Ambient video loop",
+          `◌ Curated via ${randomQuery}`,
           "▣ External source linked",
           "⌖ Creator credited"
         ]
@@ -174,10 +132,7 @@ function getCurrentItem() {
 }
 
 function saveFavorites() {
-  localStorage.setItem(
-    "driftFavorites",
-    JSON.stringify(favorites)
-  );
+  localStorage.setItem("driftFavorites", JSON.stringify(favorites));
 }
 
 function isFavorite(itemId) {
@@ -186,7 +141,6 @@ function isFavorite(itemId) {
 
 function toggleFavorite() {
   const item = getCurrentItem();
-
   if (!item) return;
 
   if (isFavorite(item.id)) {
@@ -200,8 +154,7 @@ function toggleFavorite() {
 }
 
 function renderFavoriteButton(item) {
-  const favoriteBtn =
-    document.getElementById("favoriteBtn");
+  const favoriteBtn = document.getElementById("favoriteBtn");
 
   if (isFavorite(item.id)) {
     favoriteBtn.textContent = "♥";
@@ -216,18 +169,11 @@ function renderFavoriteButton(item) {
 
 function renderItem(animate = true) {
   const item = getCurrentItem();
-
   if (!item) return;
 
-  const mainImage =
-    document.getElementById("mainImage");
-
-  const mediaLink =
-    document.getElementById("mediaLink");
-
   if (animate) {
+    const mainImage = document.getElementById("mainImage");
     mainImage.classList.add("is-fading");
-
     setTimeout(() => {
       updateContent(item);
       mainImage.classList.remove("is-fading");
@@ -235,8 +181,9 @@ function renderItem(animate = true) {
   } else {
     updateContent(item);
   }
+}
 
-  function updateContent(item) {
+function updateContent(item) {
   const mainImage = document.getElementById("mainImage");
   const mainVideo = document.getElementById("mainVideo");
 
@@ -269,65 +216,44 @@ function renderItem(animate = true) {
   renderDetails(item);
   renderFavoriteButton(item);
 }
-}
 
 function renderTags(item) {
-  const tags =
-    document.getElementById("tags");
-
+  const tags = document.getElementById("tags");
   tags.innerHTML = "";
 
   item.tags.forEach((tag) => {
-    const tagElement =
-      document.createElement("div");
-
+    const tagElement = document.createElement("div");
     tagElement.className = "tag";
     tagElement.textContent = tag;
-
     tags.appendChild(tagElement);
   });
 
-  const addTag =
-    document.createElement("div");
-
+  const addTag = document.createElement("div");
   addTag.className = "tag";
   addTag.textContent = "+";
-
   tags.appendChild(addTag);
 }
 
 function renderDetails(item) {
-  const details =
-    document.getElementById("details");
-
+  const details = document.getElementById("details");
   details.innerHTML = "";
 
   item.details.forEach((detail) => {
-    const detailElement =
-      document.createElement("div");
-
+    const detailElement = document.createElement("div");
     detailElement.className = "detail";
     detailElement.textContent = detail;
-
     details.appendChild(detailElement);
   });
 }
 
 function renderMoreLikeThis() {
-  const moreRow =
-    document.getElementById("moreRow");
-
+  const moreRow = document.getElementById("moreRow");
   moreRow.innerHTML = "";
 
   items.slice(0, 10).forEach((item, index) => {
-    const thumb =
-      document.createElement("div");
-
+    const thumb = document.createElement("div");
     thumb.className = "thumb";
-
-    thumb.innerHTML = `
-      <img src="${item.mediaUrl}" alt="${item.title}">
-    `;
+    thumb.innerHTML = `<img src="${item.thumbUrl || item.mediaUrl}" alt="${item.title}">`;
 
     thumb.addEventListener("click", () => {
       currentIndex = index;
@@ -341,61 +267,35 @@ function renderMoreLikeThis() {
 
 function nextItem() {
   if (isTransitioning) return;
-
   isTransitioning = true;
-
   currentIndex++;
-
-  if (currentIndex >= items.length) {
-    currentIndex = 0;
-  }
-
+  if (currentIndex >= items.length) currentIndex = 0;
   renderItem(true);
-
-  setTimeout(() => {
-    isTransitioning = false;
-  }, 450);
+  setTimeout(() => { isTransitioning = false; }, 450);
 }
 
 function previousItem() {
   if (isTransitioning) return;
-
   isTransitioning = true;
-
   currentIndex--;
-
-  if (currentIndex < 0) {
-    currentIndex = items.length - 1;
-  }
-
+  if (currentIndex < 0) currentIndex = items.length - 1;
   renderItem(true);
-
-  setTimeout(() => {
-    isTransitioning = false;
-  }, 450);
+  setTimeout(() => { isTransitioning = false; }, 450);
 }
 
 function shuffleItem() {
   if (items.length <= 1) return;
-
   let randomIndex = currentIndex;
-
   while (randomIndex === currentIndex) {
-    randomIndex =
-      Math.floor(Math.random() * items.length);
+    randomIndex = Math.floor(Math.random() * items.length);
   }
-
   currentIndex = randomIndex;
-
   renderItem(true);
 }
 
 function startAutoplay() {
   stopAutoplay();
-
-  autoplayTimer = setInterval(() => {
-    nextItem();
-  }, AUTOPLAY_DELAY);
+  autoplayTimer = setInterval(() => { nextItem(); }, AUTOPLAY_DELAY);
 }
 
 function stopAutoplay() {
@@ -406,16 +306,12 @@ function stopAutoplay() {
 }
 
 function resetAutoplayTimer() {
-  if (autoplayEnabled) {
-    startAutoplay();
-  }
+  if (autoplayEnabled) startAutoplay();
 }
 
 function toggleAutoplay() {
   autoplayEnabled = !autoplayEnabled;
-
-  const autoplayToggle =
-    document.getElementById("autoplayToggle");
+  const autoplayToggle = document.getElementById("autoplayToggle");
 
   if (autoplayEnabled) {
     autoplayToggle.classList.add("is-active");
@@ -426,76 +322,35 @@ function toggleAutoplay() {
   }
 }
 
-document
-  .getElementById("nextBtn")
-  .addEventListener("click", () => {
-    nextItem();
+document.getElementById("nextBtn").addEventListener("click", () => { nextItem(); resetAutoplayTimer(); });
+document.getElementById("prevBtn").addEventListener("click", () => { previousItem(); resetAutoplayTimer(); });
+document.getElementById("shuffleBtn").addEventListener("click", () => { shuffleItem(); resetAutoplayTimer(); });
+document.getElementById("favoriteBtn").addEventListener("click", toggleFavorite);
+document.getElementById("autoplayToggle").addEventListener("click", toggleAutoplay);
+
+document.querySelectorAll(".filter").forEach((filterButton) => {
+  filterButton.addEventListener("click", () => {
+    document.querySelectorAll(".filter").forEach((f) => f.classList.remove("active"));
+    filterButton.classList.add("active");
+    loadItems(filterButton.dataset.filter);
     resetAutoplayTimer();
   });
+});
 
-document
-  .getElementById("prevBtn")
-  .addEventListener("click", () => {
-    previousItem();
-    resetAutoplayTimer();
+document.querySelectorAll(".media-toggle-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".media-toggle-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentMode = btn.dataset.mode;
+    loadItems(currentFilter);
   });
-
-document
-  .getElementById("shuffleBtn")
-  .addEventListener("click", () => {
-    shuffleItem();
-    resetAutoplayTimer();
-  });
-
-document
-  .getElementById("favoriteBtn")
-  .addEventListener("click", toggleFavorite);
-
-document
-  .getElementById("autoplayToggle")
-  .addEventListener("click", toggleAutoplay);
-
-document
-  .querySelectorAll(".filter")
-  .forEach((filterButton) => {
-    filterButton.addEventListener("click", () => {
-      document
-        .querySelectorAll(".filter")
-        .forEach((f) => {
-          f.classList.remove("active");
-        });
-
-      filterButton.classList.add("active");
-
-      const filter =
-        filterButton.dataset.filter;
-
-      loadItems(filter);
-      resetAutoplayTimer();
-    });
-  });
+});
 
 document.addEventListener("keydown", (event) => {
-  if (
-    event.key.toLowerCase() === "n" ||
-    event.key === "ArrowRight"
-  ) {
-    nextItem();
-    resetAutoplayTimer();
-  }
-
-  if (event.key === "ArrowLeft") {
-    previousItem();
-    resetAutoplayTimer();
-  }
-
-  if (event.key.toLowerCase() === "f") {
-    toggleFavorite();
-  }
-
-  if (event.key.toLowerCase() === "a") {
-    toggleAutoplay();
-  }
+  if (event.key.toLowerCase() === "n" || event.key === "ArrowRight") { nextItem(); resetAutoplayTimer(); }
+  if (event.key === "ArrowLeft") { previousItem(); resetAutoplayTimer(); }
+  if (event.key.toLowerCase() === "f") toggleFavorite();
+  if (event.key.toLowerCase() === "a") toggleAutoplay();
 });
 
 loadItems();
