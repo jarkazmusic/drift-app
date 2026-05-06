@@ -21,52 +21,52 @@ const FILTERS = {
     "vintage ocean"
   ],
 
-  analog: [
-    "kodak film",
+  "vhs-summer": [
+    "vhs summer",
+    "analog beach",
+    "kodak summer",
+    "faded pool",
+    "retro vacation"
+  ],
+
+  "empty-roads": [
+    "empty highway",
+    "lonely road fog",
+    "misty road cinematic",
+    "abandoned street",
+    "road at dawn"
+  ],
+
+  "late-night": [
+    "night city rain",
+    "neon reflection",
+    "late night diner",
+    "dark urban cinematic",
+    "city lights fog"
+  ],
+
+  "winter-static": [
+    "winter fog",
+    "snow silence",
+    "frozen landscape",
+    "grey winter road",
+    "cold analog"
+  ],
+
+  "analog-dreams": [
+    "kodak film grain",
     "analog photography",
     "vhs aesthetic",
-    "faded memories",
-    "film grain"
+    "expired film",
+    "lomography"
   ],
 
-  landscape: [
-    "foggy forest",
-    "dreamy landscape",
-    "cinematic mountains",
-    "misty road",
-    "nature nostalgia"
-  ],
-
-  city: [
-    "rainy tokyo",
-    "night city film",
-    "urban nostalgia",
-    "cinematic city",
-    "retro street"
-  ],
-
-  people: [
-    "nostalgic portrait",
-    "dreamy people",
-    "cinematic portrait",
-    "faded youth",
-    "analog people"
-  ],
-
-  "still-life": [
+  "still-world": [
     "vintage objects",
-    "film camera",
     "analog desk",
     "nostalgic room",
-    "retro still life"
-  ],
-
-  video: [
-    "cinematic motion",
-    "dreamy movement",
-    "film still",
-    "movie atmosphere",
-    "ambient scene"
+    "old camera still life",
+    "retro interior"
   ]
 };
 
