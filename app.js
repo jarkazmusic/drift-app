@@ -35,6 +35,35 @@ const VIDEO_QUERIES = {
   "flowers-nature": ["flowers slow motion", "nature macro video", "blooming flowers", "forest ambient", "botanical garden"]
 };
 
+function loadSavedItem(item) {
+  const idx = items.findIndex(i => i.id === item.id);
+  if (idx !== -1) {
+    currentIndex = idx;
+    renderItem(true);
+    return;
+  }
+  const loaded = {
+    id: item.id,
+    title: item.title || "Saved item",
+    type: item.type || "image",
+    mediaUrl: item.mediaUrl || item.thumbUrl,
+    thumbUrl: item.thumbUrl || item.mediaUrl,
+    originalUrl: item.originalUrl || "#",
+    authorName: item.authorName || "—",
+    authorUrl: item.authorUrl || "#",
+    sourceName: item.sourceName || "Saved",
+    licenseName: item.licenseName || "—",
+    licenseUrl: item.licenseUrl || "#",
+    year: item.year || "—",
+    tags: item.tags || [],
+    details: item.details || ["◌ Loaded from saved items"]
+  };
+  items = [loaded, ...items];
+  currentIndex = 0;
+  renderItem(false);
+  renderMoreLikeThis();
+}
+
 // FAVORITES
 
 function saveFavorites() {
@@ -98,8 +127,7 @@ function buildFavList(container, closeOnClick) {
       <button class="fav-panel-remove" data-id="${item.id}">✕</button>
     `;
     div.querySelector(".fav-panel-thumb").addEventListener("click", () => {
-      const idx = items.findIndex(i => i.id === item.id);
-      if (idx !== -1) { currentIndex = idx; renderItem(true); }
+      loadSavedItem(item);
       if (closeOnClick) closeOnClick();
     });
     div.querySelector(".fav-panel-remove").addEventListener("click", e => {
@@ -120,7 +148,6 @@ function buildFavList(container, closeOnClick) {
 function renderFavoritesList() {
   const panelList = document.getElementById("favoritesPanelList");
   if (panelList) buildFavList(panelList, null);
-
   const sheetContent = document.getElementById("favSheetContent");
   if (sheetContent) buildFavList(sheetContent, closeFavSheet);
 }
@@ -128,7 +155,22 @@ function renderFavoritesList() {
 function saveFavoriteData(item) {
   let data = JSON.parse(localStorage.getItem("driftFavoritesData")) || [];
   if (!data.find(i => i.id === item.id)) {
-    data.unshift({ id: item.id, thumbUrl: item.thumbUrl || item.mediaUrl, title: item.title });
+    data.unshift({
+      id: item.id,
+      thumbUrl: item.thumbUrl || item.mediaUrl,
+      mediaUrl: item.mediaUrl,
+      title: item.title,
+      type: item.type,
+      originalUrl: item.originalUrl,
+      authorName: item.authorName,
+      authorUrl: item.authorUrl,
+      sourceName: item.sourceName,
+      licenseName: item.licenseName,
+      licenseUrl: item.licenseUrl,
+      year: item.year,
+      tags: item.tags,
+      details: item.details
+    });
     if (data.length > 50) data = data.slice(0, 50);
     localStorage.setItem("driftFavoritesData", JSON.stringify(data));
   }
@@ -172,7 +214,22 @@ function saveItemToBoard(boardId) {
   if (exists) {
     board.items = board.items.filter(i => i.id !== item.id);
   } else {
-    board.items.unshift({ id: item.id, thumbUrl: item.thumbUrl || item.mediaUrl, title: item.title, originalUrl: item.originalUrl, type: item.type });
+    board.items.unshift({
+      id: item.id,
+      thumbUrl: item.thumbUrl || item.mediaUrl,
+      mediaUrl: item.mediaUrl,
+      title: item.title,
+      type: item.type,
+      originalUrl: item.originalUrl,
+      authorName: item.authorName,
+      authorUrl: item.authorUrl,
+      sourceName: item.sourceName,
+      licenseName: item.licenseName,
+      licenseUrl: item.licenseUrl,
+      year: item.year,
+      tags: item.tags,
+      details: item.details
+    });
   }
   saveBoards();
   renderBoardsList();
@@ -202,8 +259,7 @@ function openBoardOverlay(board) {
       el.innerHTML = `<img src="${item.thumbUrl}" alt="${item.title}">`;
       el.addEventListener("click", () => {
         closeBoardOverlay();
-        const idx = items.findIndex(i => i.id === item.id);
-        if (idx !== -1) { currentIndex = idx; renderItem(true); }
+        loadSavedItem(item);
       });
       grid.appendChild(el);
     });
@@ -220,7 +276,6 @@ function closeBoardOverlay() {
 
 function buildBoardsList(container, closeOnOpen) {
   container.innerHTML = "";
-
   if (boards.length === 0) {
     container.innerHTML = `<p style="font-size:12px;color:var(--faint);text-align:center;padding:24px 0;">No boards yet.</p>`;
     return;
@@ -230,21 +285,21 @@ function buildBoardsList(container, closeOnOpen) {
     const el = document.createElement("div");
     el.className = "board-item";
     const thumb = board.items[0]?.thumbUrl || "";
+    const uid = Math.random().toString(36).slice(2);
     el.innerHTML = `
       <div class="board-item-header">
         <div class="board-item-thumb">${thumb ? `<img src="${thumb}" alt="">` : ""}</div>
         <span class="board-item-name">${board.name}</span>
         <span class="board-item-count">${board.items.length}</span>
       </div>
-      <div class="board-items-grid" id="bgrid-${board.id}-${Math.random().toString(36).slice(2)}"></div>
+      <div class="board-items-grid" id="bgrid-${uid}"></div>
       <div class="board-item-actions">
         <button class="board-action-btn" data-rename="${board.id}">Rename</button>
         <button class="board-action-btn" data-delete="${board.id}">Delete</button>
       </div>
     `;
 
-    const gridId = el.querySelector('[id^="bgrid-"]').id;
-    const grid = el.querySelector(`#${gridId}`);
+    const grid = el.querySelector(`#bgrid-${uid}`);
     board.items.slice(0, 6).forEach(item => {
       const t = document.createElement("div");
       t.className = "board-grid-thumb";
@@ -387,8 +442,6 @@ function closeBoardsSheet() {
 function openSaveUI() {
   if (window.innerWidth <= 700) { openBottomSheet(); } else { openBoardPopup(); }
 }
-
-// LOAD
 
 async function loadItems(filter = "all") {
   try {
@@ -643,8 +696,6 @@ function toggleAutoplay() {
     .forEach(b => { if (b) b.classList.toggle("is-active", autoplayEnabled); });
   if (autoplayEnabled) { startAutoplay(); } else { stopAutoplay(); }
 }
-
-// EVENT LISTENERS
 
 document.getElementById("nextBtn").addEventListener("click", () => { nextItem(); resetAutoplayTimer(); });
 document.getElementById("prevBtn").addEventListener("click", () => { previousItem(); resetAutoplayTimer(); });
