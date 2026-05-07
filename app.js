@@ -114,7 +114,7 @@ function buildFavList(container, closeOnClick) {
 
   container.innerHTML = "";
   if (validItems.length === 0) {
-    container.innerHTML = `<div class="favorites-empty">No favorites yet.<br>Press ♡ on any image.</div>`;
+    container.innerHTML = `<div class="favorites-empty">Nothing saved yet.<br>Let something stay with you.</div>`;
     return;
   }
 
@@ -251,7 +251,7 @@ function openBoardOverlay(board) {
   grid.innerHTML = "";
 
   if (board.items.length === 0) {
-    grid.innerHTML = `<div class="board-overlay-empty">No items saved to this board yet.</div>`;
+    grid.innerHTML = `<div class="board-overlay-empty">This board is empty.<br>Save images that speak to you.</div>`;
   } else {
     board.items.forEach(item => {
       const el = document.createElement("div");
@@ -277,7 +277,7 @@ function closeBoardOverlay() {
 function buildBoardsList(container, closeOnOpen) {
   container.innerHTML = "";
   if (boards.length === 0) {
-    container.innerHTML = `<p style="font-size:12px;color:var(--faint);text-align:center;padding:24px 0;">No boards yet.</p>`;
+    container.innerHTML = `<p style="font-size:12px;color:var(--faint);text-align:center;padding:24px 0;line-height:1.7;">No boards yet.<br>Collect what moves you.</p>`;
     return;
   }
 
