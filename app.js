@@ -3,6 +3,7 @@ let currentIndex = 0;
 let isTransitioning = false;
 
 let favorites = JSON.parse(localStorage.getItem("driftFavorites")) || [];
+let boards = JSON.parse(localStorage.getItem("driftBoards")) || [];
 
 let currentFilter = "all";
 let currentMode = "images";
@@ -33,6 +34,204 @@ const VIDEO_QUERIES = {
   "still-world": ["cozy room ambient", "candle light interior", "vintage objects table", "slow morning coffee", "quiet interior"],
   "flowers-nature": ["flowers slow motion", "nature macro video", "blooming flowers", "forest ambient", "botanical garden"]
 };
+
+function saveBoards() {
+  localStorage.setItem("driftBoards", JSON.stringify(boards));
+}
+
+function createBoard(name) {
+  const board = { id: Date.now().toString(), name: name.trim(), items: [] };
+  boards.push(board);
+  saveBoards();
+  renderBoardsList();
+  return board;
+}
+
+function renameBoard(boardId, newName) {
+  const board = boards.find(b => b.id === boardId);
+  if (board && newName.trim()) {
+    board.name = newName.trim();
+    saveBoards();
+    renderBoardsList();
+  }
+}
+
+function deleteBoard(boardId) {
+  boards = boards.filter(b => b.id !== boardId);
+  saveBoards();
+  renderBoardsList();
+}
+
+function saveItemToBoard(boardId) {
+  const item = getCurrentItem();
+  if (!item) return;
+  const board = boards.find(b => b.id === boardId);
+  if (!board) return;
+  const exists = board.items.find(i => i.id === item.id);
+  if (exists) {
+    board.items = board.items.filter(i => i.id !== item.id);
+  } else {
+    board.items.unshift({
+      id: item.id,
+      thumbUrl: item.thumbUrl || item.mediaUrl,
+      title: item.title,
+      originalUrl: item.originalUrl,
+      type: item.type
+    });
+  }
+  saveBoards();
+  renderBoardsList();
+  renderBoardPopupList();
+  renderBottomSheetList();
+}
+
+function isItemOnBoard(boardId) {
+  const item = getCurrentItem();
+  if (!item) return false;
+  const board = boards.find(b => b.id === boardId);
+  return board ? board.items.some(i => i.id === item.id) : false;
+}
+
+function renderBoardsList() {
+  const list = document.getElementById("boardsList");
+  if (!list) return;
+  list.innerHTML = "";
+
+  if (boards.length === 0) {
+    list.innerHTML = `<p style="font-size:12px;color:var(--faint);text-align:center;padding:24px 0;">No boards yet. Create one to start saving.</p>`;
+    return;
+  }
+
+  boards.forEach(board => {
+    const el = document.createElement("div");
+    el.className = "board-item";
+
+    const thumb = board.items[0]?.thumbUrl || "";
+    const thumbHtml = thumb
+      ? `<div class="board-item-thumb"><img src="${thumb}" alt=""></div>`
+      : `<div class="board-item-thumb"></div>`;
+
+    el.innerHTML = `
+      <div class="board-item-header">
+        ${thumbHtml}
+        <span class="board-item-name">${board.name}</span>
+        <span class="board-item-count">${board.items.length}</span>
+      </div>
+      <div class="board-items-grid" id="grid-${board.id}"></div>
+      <div class="board-item-actions">
+        <button class="board-action-btn" data-rename="${board.id}">Rename</button>
+        <button class="board-action-btn" data-delete="${board.id}">Delete</button>
+      </div>
+    `;
+
+    const grid = el.querySelector(`#grid-${board.id}`);
+    board.items.slice(0, 6).forEach(item => {
+      const t = document.createElement("div");
+      t.className = "board-grid-thumb";
+      t.innerHTML = `<img src="${item.thumbUrl}" alt="${item.title}">`;
+      grid.appendChild(t);
+    });
+
+    el.querySelector(`[data-rename="${board.id}"]`).addEventListener("click", (e) => {
+      e.stopPropagation();
+      const newName = prompt("New board name:", board.name);
+      if (newName) renameBoard(board.id, newName);
+    });
+
+    el.querySelector(`[data-delete="${board.id}"]`).addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (confirm(`Delete "${board.name}"?`)) deleteBoard(board.id);
+    });
+
+    list.appendChild(el);
+  });
+}
+
+function renderBoardPopupList() {
+  const list = document.getElementById("boardPopupList");
+  if (!list) return;
+  list.innerHTML = "";
+
+  if (boards.length === 0) {
+    list.innerHTML = `<p style="font-size:12px;color:var(--faint);text-align:center;padding:16px 0;">No boards yet.</p>`;
+    return;
+  }
+
+  boards.forEach(board => {
+    const saved = isItemOnBoard(board.id);
+    const thumb = board.items[0]?.thumbUrl || "";
+    const el = document.createElement("div");
+    el.className = `board-popup-item${saved ? " is-saved" : ""}`;
+    el.innerHTML = `
+      <div class="board-popup-item-thumb">${thumb ? `<img src="${thumb}" alt="">` : ""}</div>
+      <span class="board-popup-item-name">${board.name}</span>
+      <span class="board-popup-item-count">${board.items.length}</span>
+      ${saved ? "<span style='font-size:11px;color:var(--warm)'>✓</span>" : ""}
+    `;
+    el.addEventListener("click", () => {
+      saveItemToBoard(board.id);
+    });
+    list.appendChild(el);
+  });
+}
+
+function renderBottomSheetList() {
+  const list = document.getElementById("bottomSheetList");
+  if (!list) return;
+  list.innerHTML = "";
+
+  if (boards.length === 0) {
+    list.innerHTML = `<p style="font-size:12px;color:var(--faint);text-align:center;padding:16px 0;">No boards yet.</p>`;
+    return;
+  }
+
+  boards.forEach(board => {
+    const saved = isItemOnBoard(board.id);
+    const thumb = board.items[0]?.thumbUrl || "";
+    const el = document.createElement("div");
+    el.className = `board-popup-item${saved ? " is-saved" : ""}`;
+    el.innerHTML = `
+      <div class="board-popup-item-thumb">${thumb ? `<img src="${thumb}" alt="">` : ""}</div>
+      <span class="board-popup-item-name">${board.name}</span>
+      <span class="board-popup-item-count">${board.items.length}</span>
+      ${saved ? "<span style='font-size:11px;color:var(--warm)'>✓</span>" : ""}
+    `;
+    el.addEventListener("click", () => {
+      saveItemToBoard(board.id);
+    });
+    list.appendChild(el);
+  });
+}
+
+function openBoardPopup() {
+  renderBoardPopupList();
+  document.getElementById("boardPopupOverlay").classList.add("is-open");
+  document.getElementById("boardPopup").classList.add("is-open");
+}
+
+function closeBoardPopup() {
+  document.getElementById("boardPopupOverlay").classList.remove("is-open");
+  document.getElementById("boardPopup").classList.remove("is-open");
+}
+
+function openBottomSheet() {
+  renderBottomSheetList();
+  document.getElementById("bottomSheetOverlay").classList.add("is-open");
+  document.getElementById("bottomSheet").classList.add("is-open");
+}
+
+function closeBottomSheet() {
+  document.getElementById("bottomSheetOverlay").classList.remove("is-open");
+  document.getElementById("bottomSheet").classList.remove("is-open");
+}
+
+function openSaveUI() {
+  if (window.innerWidth <= 700) {
+    openBottomSheet();
+  } else {
+    openBoardPopup();
+  }
+}
 
 async function loadItems(filter = "all") {
   try {
@@ -357,11 +556,9 @@ function toggleAutoplay() {
   const btn = document.getElementById("autoplayToggle");
   const fsBtn = document.getElementById("fsAmbientBtn");
   const mobileBtn = document.getElementById("autoplayToggleMobile");
-
   [btn, fsBtn, mobileBtn].forEach(b => {
     if (b) b.classList.toggle("is-active", autoplayEnabled);
   });
-
   if (autoplayEnabled) { startAutoplay(); } else { stopAutoplay(); }
 }
 
@@ -371,18 +568,58 @@ document.getElementById("shuffleBtn").addEventListener("click", () => { shuffleI
 document.getElementById("favoriteBtn").addEventListener("click", toggleFavorite);
 document.getElementById("autoplayToggle").addEventListener("click", toggleAutoplay);
 document.getElementById("mediaLink").addEventListener("click", openFullscreen);
+document.getElementById("saveBtn").addEventListener("click", openSaveUI);
 document.getElementById("fsClose").addEventListener("click", closeFullscreen);
 document.getElementById("fsNextBtn").addEventListener("click", () => { nextItem(); resetAutoplayTimer(); });
 document.getElementById("fsPrevBtn").addEventListener("click", () => { previousItem(); resetAutoplayTimer(); });
 document.getElementById("fsFavoriteBtn").addEventListener("click", toggleFavorite);
+document.getElementById("fsSaveBtn").addEventListener("click", openSaveUI);
 document.getElementById("fsAmbientBtn").addEventListener("click", toggleAutoplay);
 
+document.getElementById("boardPopupOverlay").addEventListener("click", closeBoardPopup);
+document.getElementById("boardPopupClose").addEventListener("click", closeBoardPopup);
+document.getElementById("boardPopupCreate").addEventListener("click", () => {
+  const input = document.getElementById("boardPopupInput");
+  if (input.value.trim()) {
+    createBoard(input.value);
+    input.value = "";
+    renderBoardPopupList();
+  }
+});
+
+document.getElementById("bottomSheetOverlay").addEventListener("click", closeBottomSheet);
+document.getElementById("bottomSheetClose").addEventListener("click", closeBottomSheet);
+document.getElementById("bottomSheetCreate").addEventListener("click", () => {
+  const input = document.getElementById("bottomSheetInput");
+  if (input.value.trim()) {
+    createBoard(input.value);
+    input.value = "";
+    renderBottomSheetList();
+  }
+});
+
+document.getElementById("newBoardBtn").addEventListener("click", () => {
+  const name = prompt("Board name:");
+  if (name) createBoard(name);
+});
+
+document.querySelectorAll(".inspector-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".inspector-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    const target = tab.dataset.tab;
+    document.getElementById("panelInfo").classList.toggle("is-hidden", target !== "info");
+    document.getElementById("panelBoards").classList.toggle("is-hidden", target !== "boards");
+  });
+});
+
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeFullscreen();
+  if (event.key === "Escape") { closeFullscreen(); closeBoardPopup(); closeBottomSheet(); }
   if (event.key.toLowerCase() === "n" || event.key === "ArrowRight") { nextItem(); resetAutoplayTimer(); }
   if (event.key === "ArrowLeft") { previousItem(); resetAutoplayTimer(); }
   if (event.key.toLowerCase() === "f") toggleFavorite();
   if (event.key.toLowerCase() === "a") toggleAutoplay();
+  if (event.key.toLowerCase() === "s") openSaveUI();
 });
 
 document.querySelectorAll(".filter").forEach((filterButton) => {
@@ -436,8 +673,7 @@ document.querySelectorAll(".mobile-drawer .filter").forEach((filterButton) => {
 });
 
 const autoplayToggleMobile = document.getElementById("autoplayToggleMobile");
-if (autoplayToggleMobile) {
-  autoplayToggleMobile.addEventListener("click", toggleAutoplay);
-}
+if (autoplayToggleMobile) autoplayToggleMobile.addEventListener("click", toggleAutoplay);
 
+renderBoardsList();
 loadItems();

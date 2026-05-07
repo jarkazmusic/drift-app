@@ -116,69 +116,87 @@
     </section>
 
     <aside class="inspector">
-      <div class="section-label">About this item</div>
-      <div class="title-row">
-        <div><h2 id="itemTitle">Loading...</h2></div>
-        <div class="year" id="itemYear">—</div>
+      <div class="inspector-tabs">
+        <div class="inspector-tab active" data-tab="info">Info</div>
+        <div class="inspector-tab" data-tab="boards">Boards</div>
       </div>
-      <div class="tags" id="tags"></div>
-      <div class="divider"></div>
-      <div class="info-block">
-        <div class="info-title">Source</div>
-        <a class="source-card" id="authorLink" href="#" target="_blank">
-          <div class="source-icon" id="sourceIcon">?</div>
-          <div>
-            <div class="source-main" id="sourceName">Source</div>
-            <div class="source-sub" id="sourceAuthor">Creator</div>
-          </div>
-          <div>↗</div>
-        </a>
-      </div>
-      <div class="info-block">
-        <div class="info-title">License</div>
-        <div class="source-main" id="licenseName">License</div>
-        <a class="source-sub" id="licenseLink" href="#" target="_blank">View license ↗</a>
-      </div>
-      <div class="info-block">
-        <div class="info-title">Details</div>
-        <div class="detail-list" id="details"></div>
-      </div>
-      <div class="divider"></div>
-      <div class="info-block">
-        <div class="info-title">
-          Save to board
-          <span class="new-board">+ New Board</span>
+
+      <div class="inspector-panel" id="panelInfo">
+        <div class="section-label" style="margin-top: 16px;">About this item</div>
+        <div class="title-row">
+          <div><h2 id="itemTitle">Loading...</h2></div>
+          <div class="year" id="itemYear">—</div>
         </div>
-        <div class="boards">
-          <div class="board">
-            <div class="board-thumb"></div>
-            <span>Tycho Vibes</span>
-            <span class="count">0</span>
-            <span>▱</span>
-          </div>
-          <div class="board">
-            <div class="board-thumb"></div>
-            <span>Boards of Canada</span>
-            <span class="count">0</span>
-            <span>▱</span>
-          </div>
-          <div class="board">
-            <div class="board-thumb"></div>
-            <span>Faded Landscapes</span>
-            <span class="count">0</span>
-            <span>▱</span>
-          </div>
+        <div class="tags" id="tags"></div>
+        <div class="divider"></div>
+        <div class="info-block">
+          <div class="info-title">Source</div>
+          <a class="source-card" id="authorLink" href="#" target="_blank">
+            <div class="source-icon" id="sourceIcon">?</div>
+            <div>
+              <div class="source-main" id="sourceName">Source</div>
+              <div class="source-sub" id="sourceAuthor">Creator</div>
+            </div>
+            <div>↗</div>
+          </a>
+        </div>
+        <div class="info-block">
+          <div class="info-title">License</div>
+          <div class="source-main" id="licenseName">License</div>
+          <a class="source-sub" id="licenseLink" href="#" target="_blank">View license ↗</a>
+        </div>
+        <div class="info-block">
+          <div class="info-title">Details</div>
+          <div class="detail-list" id="details"></div>
+        </div>
+        <div class="upgrade">
+          <div class="upgrade-title">▣ Unlock unlimited drifting</div>
+          <p>Later: private boards, extended history, saved streams and custom vibe channels.</p>
+          <button>Upgrade later</button>
         </div>
       </div>
-      <div class="upgrade">
-        <div class="upgrade-title">▣ Unlock unlimited drifting</div>
-        <p>Later: private boards, extended history, saved streams and custom vibe channels.</p>
-        <button>Upgrade later</button>
+
+      <div class="inspector-panel is-hidden" id="panelBoards">
+        <div class="boards-header">
+          <div class="section-label" style="margin-top: 16px;">My Boards</div>
+          <button class="new-board-btn" id="newBoardBtn">+ New Board</button>
+        </div>
+        <div class="boards-list" id="boardsList"></div>
       </div>
     </aside>
 
   </div>
 
+  <!-- SAVE TO BOARD POPUP -->
+  <div class="board-popup-overlay" id="boardPopupOverlay"></div>
+  <div class="board-popup" id="boardPopup">
+    <div class="board-popup-header">
+      <span class="board-popup-title">Save to Board</span>
+      <button class="board-popup-close" id="boardPopupClose">✕</button>
+    </div>
+    <div class="board-popup-list" id="boardPopupList"></div>
+    <div class="board-popup-new">
+      <input class="board-popup-input" id="boardPopupInput" type="text" placeholder="New board name..." maxlength="40" />
+      <button class="board-popup-create" id="boardPopupCreate">Create</button>
+    </div>
+  </div>
+
+  <!-- MOBILE BOTTOM SHEET FOR BOARDS -->
+  <div class="bottom-sheet-overlay" id="bottomSheetOverlay"></div>
+  <div class="bottom-sheet" id="bottomSheet">
+    <div class="bottom-sheet-handle"></div>
+    <div class="bottom-sheet-header">
+      <span class="board-popup-title">Save to Board</span>
+      <button class="board-popup-close" id="bottomSheetClose">✕</button>
+    </div>
+    <div class="board-popup-list" id="bottomSheetList"></div>
+    <div class="board-popup-new">
+      <input class="board-popup-input" id="bottomSheetInput" type="text" placeholder="New board name..." maxlength="40" />
+      <button class="board-popup-create" id="bottomSheetCreate">Create</button>
+    </div>
+  </div>
+
+  <!-- FULLSCREEN OVERLAY -->
   <div class="fullscreen-overlay" id="fullscreenOverlay">
     <div class="fs-media">
       <img id="fsImage" src="" alt="" />
@@ -187,6 +205,7 @@
     <div class="fs-controls">
       <button class="fs-btn" id="fsPrevBtn">←</button>
       <button class="fs-btn" id="fsFavoriteBtn">♡ Favorite</button>
+      <button class="fs-btn" id="fsSaveBtn">▱ Save</button>
       <button class="fs-btn fs-ambient" id="fsAmbientBtn"><span class="toggle-dot"></span> Ambient</button>
       <a class="fs-btn fs-source" id="fsSourceLink" href="#" target="_blank">View Original ↗</a>
       <button class="fs-btn" id="fsNextBtn">→</button>
