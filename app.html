@@ -101,7 +101,9 @@
         <div class="transport">
           <button class="control-circle tooltip" id="prevBtn" data-tip="Previous">←</button>
           <button class="main-next" id="nextBtn">Next →</button>
-          <button class="control-circle tooltip" id="infoBtn" data-tip="Item info" style="font-size:16px;font-style:italic;font-weight:600;">i</button>
+          <button class="control-circle mobile-only tooltip" id="infoBtn" data-tip="Info" style="font-size:16px;font-style:italic;font-weight:600;">i</button>
+          <button class="control-circle mobile-only tooltip" id="favMobileBtn" data-tip="Favorites">♡</button>
+          <button class="control-circle mobile-only tooltip" id="boardsMobileBtn" data-tip="Boards">▦</button>
         </div>
 
         <div class="hint">
@@ -173,6 +175,15 @@
 
   </div>
 
+  <!-- BOARD FULLSCREEN OVERLAY -->
+  <div class="board-overlay" id="boardOverlay">
+    <div class="board-overlay-header">
+      <span class="board-overlay-title" id="boardOverlayTitle">Board</span>
+      <button class="board-overlay-close" id="boardOverlayClose">✕</button>
+    </div>
+    <div class="board-overlay-grid" id="boardOverlayGrid"></div>
+  </div>
+
   <!-- MOBILE INFO BOTTOM SHEET -->
   <div class="info-sheet-overlay" id="infoSheetOverlay"></div>
   <div class="info-sheet" id="infoSheet">
@@ -205,6 +216,28 @@
     </div>
   </div>
 
+  <!-- MOBILE FAVORITES BOTTOM SHEET -->
+  <div class="fav-sheet-overlay" id="favSheetOverlay"></div>
+  <div class="fav-sheet" id="favSheet">
+    <div class="bottom-sheet-handle"></div>
+    <div class="bottom-sheet-header">
+      <span class="board-popup-title">My Favorites</span>
+      <button class="board-popup-close" id="favSheetClose">✕</button>
+    </div>
+    <div class="info-sheet-content" id="favSheetContent"></div>
+  </div>
+
+  <!-- MOBILE BOARDS BOTTOM SHEET -->
+  <div class="boards-sheet-overlay" id="boardsSheetOverlay"></div>
+  <div class="boards-sheet" id="boardsSheet">
+    <div class="bottom-sheet-handle"></div>
+    <div class="bottom-sheet-header">
+      <span class="board-popup-title">My Boards</span>
+      <button class="board-popup-close" id="boardsSheetClose">✕</button>
+    </div>
+    <div class="info-sheet-content" id="boardsSheetContent"></div>
+  </div>
+
   <!-- SAVE TO BOARD POPUP -->
   <div class="board-popup-overlay" id="boardPopupOverlay"></div>
   <div class="board-popup" id="boardPopup">
@@ -219,7 +252,7 @@
     </div>
   </div>
 
-  <!-- MOBILE BOTTOM SHEET FOR BOARDS -->
+  <!-- MOBILE BOTTOM SHEET FOR SAVE -->
   <div class="bottom-sheet-overlay" id="bottomSheetOverlay"></div>
   <div class="bottom-sheet" id="bottomSheet">
     <div class="bottom-sheet-handle"></div>

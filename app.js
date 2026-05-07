@@ -78,44 +78,51 @@ function updateFsFavoriteBtn() {
   btn.classList.toggle("is-active", isFavorite(item.id));
 }
 
-function renderFavoritesList() {
+function buildFavList(container, closeOnClick) {
   const favItems = JSON.parse(localStorage.getItem("driftFavoritesData")) || [];
   const ids = JSON.parse(localStorage.getItem("driftFavorites")) || [];
   const validItems = favItems.filter(i => ids.includes(i.id));
 
-  const panelList = document.getElementById("favoritesPanelList");
-  if (panelList) {
-    panelList.innerHTML = "";
-    if (validItems.length === 0) {
-      panelList.innerHTML = `<div class="favorites-empty">No favorites yet.<br>Press ♡ on any image.</div>`;
-    } else {
-      validItems.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "fav-panel-item";
-        div.innerHTML = `
-          <div class="fav-panel-thumb"><img src="${item.thumbUrl}" alt="${item.title}"></div>
-          <div class="fav-panel-info"><div class="fav-panel-title">${item.title || "Untitled"}</div></div>
-          <button class="fav-panel-remove" data-id="${item.id}">✕</button>
-        `;
-        div.querySelector(".fav-panel-thumb").addEventListener("click", () => {
-          const idx = items.findIndex(i => i.id === item.id);
-          if (idx !== -1) { currentIndex = idx; renderItem(true); }
-        });
-        div.querySelector(".fav-panel-remove").addEventListener("click", e => {
-          e.stopPropagation();
-          favorites = favorites.filter(id => id !== item.id);
-          saveFavorites();
-          let data = JSON.parse(localStorage.getItem("driftFavoritesData")) || [];
-          data = data.filter(i => i.id !== item.id);
-          localStorage.setItem("driftFavoritesData", JSON.stringify(data));
-          renderFavoritesList();
-          const cur = getCurrentItem();
-          if (cur) renderFavoriteButton(cur);
-        });
-        panelList.appendChild(div);
-      });
-    }
+  container.innerHTML = "";
+  if (validItems.length === 0) {
+    container.innerHTML = `<div class="favorites-empty">No favorites yet.<br>Press ♡ on any image.</div>`;
+    return;
   }
+
+  validItems.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "fav-panel-item";
+    div.innerHTML = `
+      <div class="fav-panel-thumb"><img src="${item.thumbUrl}" alt="${item.title}"></div>
+      <div class="fav-panel-info"><div class="fav-panel-title">${item.title || "Untitled"}</div></div>
+      <button class="fav-panel-remove" data-id="${item.id}">✕</button>
+    `;
+    div.querySelector(".fav-panel-thumb").addEventListener("click", () => {
+      const idx = items.findIndex(i => i.id === item.id);
+      if (idx !== -1) { currentIndex = idx; renderItem(true); }
+      if (closeOnClick) closeOnClick();
+    });
+    div.querySelector(".fav-panel-remove").addEventListener("click", e => {
+      e.stopPropagation();
+      favorites = favorites.filter(id => id !== item.id);
+      saveFavorites();
+      let data = JSON.parse(localStorage.getItem("driftFavoritesData")) || [];
+      data = data.filter(i => i.id !== item.id);
+      localStorage.setItem("driftFavoritesData", JSON.stringify(data));
+      renderFavoritesList();
+      const cur = getCurrentItem();
+      if (cur) renderFavoriteButton(cur);
+    });
+    container.appendChild(div);
+  });
+}
+
+function renderFavoritesList() {
+  const panelList = document.getElementById("favoritesPanelList");
+  if (panelList) buildFavList(panelList, null);
+
+  const sheetContent = document.getElementById("favSheetContent");
+  if (sheetContent) buildFavList(sheetContent, closeFavSheet);
 }
 
 function saveFavoriteData(item) {
@@ -171,6 +178,7 @@ function saveItemToBoard(boardId) {
   renderBoardsList();
   renderBoardPopupList();
   renderBottomSheetList();
+  renderMobileBoardsList();
 }
 
 function isItemOnBoard(boardId) {
@@ -180,13 +188,41 @@ function isItemOnBoard(boardId) {
   return board ? board.items.some(i => i.id === item.id) : false;
 }
 
-function renderBoardsList() {
-  const list = document.getElementById("boardsList");
-  if (!list) return;
-  list.innerHTML = "";
+function openBoardOverlay(board) {
+  document.getElementById("boardOverlayTitle").textContent = board.name;
+  const grid = document.getElementById("boardOverlayGrid");
+  grid.innerHTML = "";
+
+  if (board.items.length === 0) {
+    grid.innerHTML = `<div class="board-overlay-empty">No items saved to this board yet.</div>`;
+  } else {
+    board.items.forEach(item => {
+      const el = document.createElement("div");
+      el.className = "board-overlay-item";
+      el.innerHTML = `<img src="${item.thumbUrl}" alt="${item.title}">`;
+      el.addEventListener("click", () => {
+        closeBoardOverlay();
+        const idx = items.findIndex(i => i.id === item.id);
+        if (idx !== -1) { currentIndex = idx; renderItem(true); }
+      });
+      grid.appendChild(el);
+    });
+  }
+
+  document.getElementById("boardOverlay").classList.add("is-open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeBoardOverlay() {
+  document.getElementById("boardOverlay").classList.remove("is-open");
+  document.body.style.overflow = "";
+}
+
+function buildBoardsList(container, closeOnOpen) {
+  container.innerHTML = "";
 
   if (boards.length === 0) {
-    list.innerHTML = `<p style="font-size:12px;color:var(--faint);text-align:center;padding:24px 0;">No boards yet. Create one to start saving.</p>`;
+    container.innerHTML = `<p style="font-size:12px;color:var(--faint);text-align:center;padding:24px 0;">No boards yet.</p>`;
     return;
   }
 
@@ -200,19 +236,25 @@ function renderBoardsList() {
         <span class="board-item-name">${board.name}</span>
         <span class="board-item-count">${board.items.length}</span>
       </div>
-      <div class="board-items-grid" id="grid-${board.id}"></div>
+      <div class="board-items-grid" id="bgrid-${board.id}-${Math.random().toString(36).slice(2)}"></div>
       <div class="board-item-actions">
         <button class="board-action-btn" data-rename="${board.id}">Rename</button>
         <button class="board-action-btn" data-delete="${board.id}">Delete</button>
       </div>
     `;
 
-    const grid = el.querySelector(`#grid-${board.id}`);
+    const gridId = el.querySelector('[id^="bgrid-"]').id;
+    const grid = el.querySelector(`#${gridId}`);
     board.items.slice(0, 6).forEach(item => {
       const t = document.createElement("div");
       t.className = "board-grid-thumb";
       t.innerHTML = `<img src="${item.thumbUrl}" alt="${item.title}">`;
       grid.appendChild(t);
+    });
+
+    el.querySelector(".board-item-header").addEventListener("click", () => {
+      if (closeOnOpen) closeOnOpen();
+      openBoardOverlay(board);
     });
 
     el.querySelector(`[data-rename="${board.id}"]`).addEventListener("click", e => {
@@ -226,8 +268,19 @@ function renderBoardsList() {
       if (confirm(`Delete "${board.name}"?`)) deleteBoard(board.id);
     });
 
-    list.appendChild(el);
+    container.appendChild(el);
   });
+}
+
+function renderBoardsList() {
+  const list = document.getElementById("boardsList");
+  if (list) buildBoardsList(list, null);
+  renderMobileBoardsList();
+}
+
+function renderMobileBoardsList() {
+  const content = document.getElementById("boardsSheetContent");
+  if (content) buildBoardsList(content, closeBoardsSheet);
 }
 
 function renderBoardPopupList() {
@@ -283,10 +336,6 @@ function closeBoardPopup() { document.getElementById("boardPopupOverlay").classL
 function openBottomSheet() { renderBottomSheetList(); document.getElementById("bottomSheetOverlay").classList.add("is-open"); document.getElementById("bottomSheet").classList.add("is-open"); }
 function closeBottomSheet() { document.getElementById("bottomSheetOverlay").classList.remove("is-open"); document.getElementById("bottomSheet").classList.remove("is-open"); }
 
-function openSaveUI() {
-  if (window.innerWidth <= 700) { openBottomSheet(); } else { openBoardPopup(); }
-}
-
 function openInfoSheet() {
   const item = getCurrentItem();
   if (!item) return;
@@ -296,7 +345,6 @@ function openInfoSheet() {
   document.getElementById("infoAuthorLink").href = item.authorUrl;
   document.getElementById("infoLicenseName").textContent = item.licenseName;
   document.getElementById("infoLicenseLink").href = item.licenseUrl;
-
   const infoDetails = document.getElementById("infoDetails");
   infoDetails.innerHTML = "";
   item.details.forEach(detail => {
@@ -305,7 +353,6 @@ function openInfoSheet() {
     el.textContent = detail;
     infoDetails.appendChild(el);
   });
-
   document.getElementById("infoSheetOverlay").classList.add("is-open");
   document.getElementById("infoSheet").classList.add("is-open");
 }
@@ -313,6 +360,32 @@ function openInfoSheet() {
 function closeInfoSheet() {
   document.getElementById("infoSheetOverlay").classList.remove("is-open");
   document.getElementById("infoSheet").classList.remove("is-open");
+}
+
+function openFavSheet() {
+  renderFavoritesList();
+  document.getElementById("favSheetOverlay").classList.add("is-open");
+  document.getElementById("favSheet").classList.add("is-open");
+}
+
+function closeFavSheet() {
+  document.getElementById("favSheetOverlay").classList.remove("is-open");
+  document.getElementById("favSheet").classList.remove("is-open");
+}
+
+function openBoardsSheet() {
+  renderMobileBoardsList();
+  document.getElementById("boardsSheetOverlay").classList.add("is-open");
+  document.getElementById("boardsSheet").classList.add("is-open");
+}
+
+function closeBoardsSheet() {
+  document.getElementById("boardsSheetOverlay").classList.remove("is-open");
+  document.getElementById("boardsSheet").classList.remove("is-open");
+}
+
+function openSaveUI() {
+  if (window.innerWidth <= 700) { openBottomSheet(); } else { openBoardPopup(); }
 }
 
 // LOAD
@@ -575,7 +648,10 @@ function toggleAutoplay() {
 
 document.getElementById("nextBtn").addEventListener("click", () => { nextItem(); resetAutoplayTimer(); });
 document.getElementById("prevBtn").addEventListener("click", () => { previousItem(); resetAutoplayTimer(); });
-document.getElementById("infoBtn").addEventListener("click", () => { if (window.innerWidth <= 700) openInfoSheet(); });
+document.getElementById("infoBtn").addEventListener("click", openInfoSheet);
+document.getElementById("favMobileBtn").addEventListener("click", openFavSheet);
+document.getElementById("boardsMobileBtn").addEventListener("click", openBoardsSheet);
+
 document.getElementById("favoriteBtn").addEventListener("click", () => {
   const item = getCurrentItem();
   if (item) saveFavoriteData(item);
@@ -595,6 +671,7 @@ document.getElementById("fsFavoriteBtn").addEventListener("click", () => {
 document.getElementById("fsSaveBtn").addEventListener("click", openSaveUI);
 document.getElementById("fsAmbientBtn").addEventListener("click", toggleAutoplay);
 
+document.getElementById("boardOverlayClose").addEventListener("click", closeBoardOverlay);
 document.getElementById("boardPopupOverlay").addEventListener("click", closeBoardPopup);
 document.getElementById("boardPopupClose").addEventListener("click", closeBoardPopup);
 document.getElementById("boardPopupCreate").addEventListener("click", () => {
@@ -611,6 +688,10 @@ document.getElementById("bottomSheetCreate").addEventListener("click", () => {
 
 document.getElementById("infoSheetOverlay").addEventListener("click", closeInfoSheet);
 document.getElementById("infoSheetClose").addEventListener("click", closeInfoSheet);
+document.getElementById("favSheetOverlay").addEventListener("click", closeFavSheet);
+document.getElementById("favSheetClose").addEventListener("click", closeFavSheet);
+document.getElementById("boardsSheetOverlay").addEventListener("click", closeBoardsSheet);
+document.getElementById("boardsSheetClose").addEventListener("click", closeBoardsSheet);
 
 document.getElementById("newBoardBtn").addEventListener("click", () => {
   const name = prompt("Board name:");
@@ -630,7 +711,10 @@ document.querySelectorAll(".inspector-tab").forEach(tab => {
 });
 
 document.addEventListener("keydown", event => {
-  if (event.key === "Escape") { closeFullscreen(); closeBoardPopup(); closeBottomSheet(); closeInfoSheet(); }
+  if (event.key === "Escape") {
+    closeFullscreen(); closeBoardPopup(); closeBottomSheet();
+    closeInfoSheet(); closeFavSheet(); closeBoardsSheet(); closeBoardOverlay();
+  }
   if (event.key.toLowerCase() === "n" || event.key === "ArrowRight") { nextItem(); resetAutoplayTimer(); }
   if (event.key === "ArrowLeft") { previousItem(); resetAutoplayTimer(); }
   if (event.key.toLowerCase() === "f") {
