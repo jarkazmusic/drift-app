@@ -81,37 +81,41 @@ function updateFsFavoriteBtn() {
 function renderFavoritesList() {
   const favItems = JSON.parse(localStorage.getItem("driftFavoritesData")) || [];
   const ids = JSON.parse(localStorage.getItem("driftFavorites")) || [];
+  const validItems = favItems.filter(i => ids.includes(i.id));
 
-  ["favoritesList", "drawerFavoritesList"].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.innerHTML = "";
-
-    const validItems = favItems.filter(i => ids.includes(i.id));
-
+  const panelList = document.getElementById("favoritesPanelList");
+  if (panelList) {
+    panelList.innerHTML = "";
     if (validItems.length === 0) {
-      el.innerHTML = `<div class="favorites-empty">No favorites yet.</div>`;
-      return;
-    }
-
-    validItems.forEach(item => {
-      const div = document.createElement("div");
-      div.className = "favorite-item";
-      div.innerHTML = `
-        <div class="favorite-thumb"><img src="${item.thumbUrl}" alt="${item.title}"></div>
-        <span class="favorite-title">${item.title || "Untitled"}</span>
-      `;
-      div.addEventListener("click", () => {
-        const idx = items.findIndex(i => i.id === item.id);
-        if (idx !== -1) {
-          currentIndex = idx;
-          renderItem(true);
-          closeDrawer();
-        }
+      panelList.innerHTML = `<div class="favorites-empty">No favorites yet.<br>Press ♡ on any image.</div>`;
+    } else {
+      validItems.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "fav-panel-item";
+        div.innerHTML = `
+          <div class="fav-panel-thumb"><img src="${item.thumbUrl}" alt="${item.title}"></div>
+          <div class="fav-panel-info"><div class="fav-panel-title">${item.title || "Untitled"}</div></div>
+          <button class="fav-panel-remove" data-id="${item.id}">✕</button>
+        `;
+        div.querySelector(".fav-panel-thumb").addEventListener("click", () => {
+          const idx = items.findIndex(i => i.id === item.id);
+          if (idx !== -1) { currentIndex = idx; renderItem(true); }
+        });
+        div.querySelector(".fav-panel-remove").addEventListener("click", e => {
+          e.stopPropagation();
+          favorites = favorites.filter(id => id !== item.id);
+          saveFavorites();
+          let data = JSON.parse(localStorage.getItem("driftFavoritesData")) || [];
+          data = data.filter(i => i.id !== item.id);
+          localStorage.setItem("driftFavoritesData", JSON.stringify(data));
+          renderFavoritesList();
+          const cur = getCurrentItem();
+          if (cur) renderFavoriteButton(cur);
+        });
+        panelList.appendChild(div);
       });
-      el.appendChild(div);
-    });
-  });
+    }
+  }
 }
 
 function saveFavoriteData(item) {
@@ -620,6 +624,8 @@ document.querySelectorAll(".inspector-tab").forEach(tab => {
     const target = tab.dataset.tab;
     document.getElementById("panelInfo").classList.toggle("is-hidden", target !== "info");
     document.getElementById("panelBoards").classList.toggle("is-hidden", target !== "boards");
+    document.getElementById("panelFavorites").classList.toggle("is-hidden", target !== "favorites");
+    if (target === "favorites") renderFavoritesList();
   });
 });
 
