@@ -218,7 +218,7 @@ button { font: inherit; }
 .autoplay-toggle.is-active {
   color: var(--cream);
   border-color: rgba(207,169,120,.4);
-  background: rgba(207,169,120,.12);
+  background: #e05555;
   animation: pulse-ring 2s ease-out infinite;
 }
 
