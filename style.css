@@ -818,7 +818,7 @@ button { font: inherit; }
 .view-original {
   position: absolute;
   left: 24px;
-  bottom: 45px;
+  bottom: 55px;
   z-index: 5;
   display: inline-flex;
   align-items: center;
