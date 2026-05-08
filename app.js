@@ -714,7 +714,11 @@ document.getElementById("fsFavoriteBtn").addEventListener("click", () => {
   toggleFavorite();
 });
 document.getElementById("fsSaveBtn").addEventListener("click", openSaveUI);
-document.getElementById("fsAmbientBtn").addEventListener("click", toggleAutoplay);
+document.getElementById("fsAmbientBtn").addEventListener("click", () => {
+  closeFullscreen();
+  toggleAutoplay();
+  if (autoplayEnabled) openAmbient();
+});
 
 document.getElementById("ambientExit").addEventListener("click", closeAmbient);
 document.getElementById("ambientNext").addEventListener("click", () => { nextItem(); resetAutoplayTimer(); });
