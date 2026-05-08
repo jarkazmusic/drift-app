@@ -249,7 +249,6 @@ function openBoardOverlay(board) {
   document.getElementById("boardOverlayTitle").textContent = board.name;
   const grid = document.getElementById("boardOverlayGrid");
   grid.innerHTML = "";
-
   if (board.items.length === 0) {
     grid.innerHTML = `<div class="board-overlay-empty">This board is empty.<br>Save images that speak to you.</div>`;
   } else {
@@ -257,14 +256,10 @@ function openBoardOverlay(board) {
       const el = document.createElement("div");
       el.className = "board-overlay-item";
       el.innerHTML = `<img src="${item.thumbUrl}" alt="${item.title}">`;
-      el.addEventListener("click", () => {
-        closeBoardOverlay();
-        loadSavedItem(item);
-      });
+      el.addEventListener("click", () => { closeBoardOverlay(); loadSavedItem(item); });
       grid.appendChild(el);
     });
   }
-
   document.getElementById("boardOverlay").classList.add("is-open");
   document.body.style.overflow = "hidden";
 }
@@ -280,7 +275,6 @@ function buildBoardsList(container, closeOnOpen) {
     container.innerHTML = `<p style="font-size:12px;color:var(--faint);text-align:center;padding:24px 0;line-height:1.7;">No boards yet.<br>Collect what moves you.</p>`;
     return;
   }
-
   boards.forEach(board => {
     const el = document.createElement("div");
     el.className = "board-item";
@@ -298,7 +292,6 @@ function buildBoardsList(container, closeOnOpen) {
         <button class="board-action-btn" data-delete="${board.id}">Delete</button>
       </div>
     `;
-
     const grid = el.querySelector(`#bgrid-${uid}`);
     board.items.slice(0, 6).forEach(item => {
       const t = document.createElement("div");
@@ -306,23 +299,9 @@ function buildBoardsList(container, closeOnOpen) {
       t.innerHTML = `<img src="${item.thumbUrl}" alt="${item.title}">`;
       grid.appendChild(t);
     });
-
-    el.querySelector(".board-item-header").addEventListener("click", () => {
-      if (closeOnOpen) closeOnOpen();
-      openBoardOverlay(board);
-    });
-
-    el.querySelector(`[data-rename="${board.id}"]`).addEventListener("click", e => {
-      e.stopPropagation();
-      const n = prompt("New board name:", board.name);
-      if (n) renameBoard(board.id, n);
-    });
-
-    el.querySelector(`[data-delete="${board.id}"]`).addEventListener("click", e => {
-      e.stopPropagation();
-      if (confirm(`Delete "${board.name}"?`)) deleteBoard(board.id);
-    });
-
+    el.querySelector(".board-item-header").addEventListener("click", () => { if (closeOnOpen) closeOnOpen(); openBoardOverlay(board); });
+    el.querySelector(`[data-rename="${board.id}"]`).addEventListener("click", e => { e.stopPropagation(); const n = prompt("New board name:", board.name); if (n) renameBoard(board.id, n); });
+    el.querySelector(`[data-delete="${board.id}"]`).addEventListener("click", e => { e.stopPropagation(); if (confirm(`Delete "${board.name}"?`)) deleteBoard(board.id); });
     container.appendChild(el);
   });
 }
@@ -412,42 +391,55 @@ function openInfoSheet() {
   document.getElementById("infoSheet").classList.add("is-open");
 }
 
-function closeInfoSheet() {
-  document.getElementById("infoSheetOverlay").classList.remove("is-open");
-  document.getElementById("infoSheet").classList.remove("is-open");
+function closeInfoSheet() { document.getElementById("infoSheetOverlay").classList.remove("is-open"); document.getElementById("infoSheet").classList.remove("is-open"); }
+function openFavSheet() { renderFavoritesList(); document.getElementById("favSheetOverlay").classList.add("is-open"); document.getElementById("favSheet").classList.add("is-open"); }
+function closeFavSheet() { document.getElementById("favSheetOverlay").classList.remove("is-open"); document.getElementById("favSheet").classList.remove("is-open"); }
+function openBoardsSheet() { renderMobileBoardsList(); document.getElementById("boardsSheetOverlay").classList.add("is-open"); document.getElementById("boardsSheet").classList.add("is-open"); }
+function closeBoardsSheet() { document.getElementById("boardsSheetOverlay").classList.remove("is-open"); document.getElementById("boardsSheet").classList.remove("is-open"); }
+function openSaveUI() { if (window.innerWidth <= 700) { openBottomSheet(); } else { openBoardPopup(); } }
+
+// AMBIENT
+
+function openAmbient() {
+  const item = getCurrentItem();
+  if (!item) return;
+  updateAmbientMedia(item);
+  document.getElementById("ambientOverlay").classList.add("is-open");
+  document.body.style.overflow = "hidden";
 }
 
-function openFavSheet() {
-  renderFavoritesList();
-  document.getElementById("favSheetOverlay").classList.add("is-open");
-  document.getElementById("favSheet").classList.add("is-open");
+function closeAmbient() {
+  document.getElementById("ambientOverlay").classList.remove("is-open");
+  document.body.style.overflow = "";
+  const v = document.getElementById("ambientVideo");
+  v.pause();
+  v.src = "";
 }
 
-function closeFavSheet() {
-  document.getElementById("favSheetOverlay").classList.remove("is-open");
-  document.getElementById("favSheet").classList.remove("is-open");
+function updateAmbientMedia(item) {
+  const img = document.getElementById("ambientImage");
+  const vid = document.getElementById("ambientVideo");
+  const src = document.getElementById("ambientSource");
+  if (item.type === "video") {
+    img.style.display = "none";
+    vid.style.display = "block";
+    vid.src = item.mediaUrl;
+    vid.play();
+  } else {
+    vid.style.display = "none";
+    vid.src = "";
+    img.style.display = "block";
+    img.src = item.mediaUrl;
+  }
+  if (src) src.href = item.originalUrl;
 }
 
-function openBoardsSheet() {
-  renderMobileBoardsList();
-  document.getElementById("boardsSheetOverlay").classList.add("is-open");
-  document.getElementById("boardsSheet").classList.add("is-open");
-}
-
-function closeBoardsSheet() {
-  document.getElementById("boardsSheetOverlay").classList.remove("is-open");
-  document.getElementById("boardsSheet").classList.remove("is-open");
-}
-
-function openSaveUI() {
-  if (window.innerWidth <= 700) { openBottomSheet(); } else { openBoardPopup(); }
-}
+// LOAD
 
 async function loadItems(filter = "all") {
   try {
     currentFilter = filter;
     if (currentMode === "video") { await loadPexelsVideos(filter); return; }
-
     const filterQueries = FILTERS[filter];
     const randomQuery = filterQueries[Math.floor(Math.random() * filterQueries.length)];
     const randomPage = Math.floor(Math.random() * 8) + 1;
@@ -498,7 +490,6 @@ async function loadItems(filter = "all") {
         details: [`◌ Curated via ${randomQuery}`, "▣ External source linked", "⌖ Creator credited"]
       }));
     }
-
     currentIndex = 0;
     renderItem(false);
     renderMoreLikeThis();
@@ -510,13 +501,11 @@ async function loadPexelsVideos(filter = "all") {
     const queries = VIDEO_QUERIES[filter] || VIDEO_QUERIES.all;
     const randomQuery = queries[Math.floor(Math.random() * queries.length)];
     const randomPage = Math.floor(Math.random() * 5) + 1;
-
     const response = await fetch(
       `https://api.pexels.com/videos/search?query=${encodeURIComponent(randomQuery)}&per_page=18&page=${randomPage}&orientation=landscape`,
       { headers: { Authorization: PEXELS_API_KEY } }
     );
     const data = await response.json();
-
     items = data.videos.map(video => {
       const file = video.video_files.find(f => f.quality === "hd") || video.video_files[0];
       const thumb = video.video_pictures?.[0]?.picture || "";
@@ -537,7 +526,6 @@ async function loadPexelsVideos(filter = "all") {
         details: [`◌ Curated via ${randomQuery}`, "▣ External source linked", "⌖ Creator credited"]
       };
     });
-
     currentIndex = 0;
     renderItem(false);
     renderMoreLikeThis();
@@ -587,6 +575,7 @@ function updateContent(item) {
   document.getElementById("licenseLink").href = item.licenseUrl;
 
   if (document.getElementById("fullscreenOverlay").classList.contains("is-open")) updateFullscreen(item);
+  if (document.getElementById("ambientOverlay").classList.contains("is-open")) updateAmbientMedia(item);
 
   renderTags(item);
   renderDetails(item);
@@ -596,7 +585,6 @@ function updateContent(item) {
 function updateFullscreen(item) {
   const fsImage = document.getElementById("fsImage");
   const fsVideo = document.getElementById("fsVideo");
-
   if (item.type === "video") {
     fsImage.style.display = "none";
     fsVideo.style.display = "block";
@@ -609,7 +597,6 @@ function updateFullscreen(item) {
     fsImage.src = item.mediaUrl;
     fsImage.alt = item.title;
   }
-
   document.getElementById("fsSourceLink").href = item.originalUrl;
   updateFsFavoriteBtn();
 }
@@ -697,6 +684,8 @@ function toggleAutoplay() {
   if (autoplayEnabled) { startAutoplay(); } else { stopAutoplay(); }
 }
 
+// EVENT LISTENERS
+
 document.getElementById("nextBtn").addEventListener("click", () => { nextItem(); resetAutoplayTimer(); });
 document.getElementById("prevBtn").addEventListener("click", () => { previousItem(); resetAutoplayTimer(); });
 document.getElementById("infoBtn").addEventListener("click", openInfoSheet);
@@ -708,7 +697,12 @@ document.getElementById("favoriteBtn").addEventListener("click", () => {
   if (item) saveFavoriteData(item);
   toggleFavorite();
 });
-document.getElementById("autoplayToggle").addEventListener("click", toggleAutoplay);
+
+document.getElementById("autoplayToggle").addEventListener("click", () => {
+  toggleAutoplay();
+  if (autoplayEnabled) { openAmbient(); } else { closeAmbient(); }
+});
+
 document.getElementById("mediaLink").addEventListener("click", openFullscreen);
 document.getElementById("saveBtn").addEventListener("click", openSaveUI);
 document.getElementById("fsClose").addEventListener("click", closeFullscreen);
@@ -721,6 +715,10 @@ document.getElementById("fsFavoriteBtn").addEventListener("click", () => {
 });
 document.getElementById("fsSaveBtn").addEventListener("click", openSaveUI);
 document.getElementById("fsAmbientBtn").addEventListener("click", toggleAutoplay);
+
+document.getElementById("ambientExit").addEventListener("click", closeAmbient);
+document.getElementById("ambientNext").addEventListener("click", () => { nextItem(); resetAutoplayTimer(); });
+document.getElementById("ambientPrev").addEventListener("click", () => { previousItem(); resetAutoplayTimer(); });
 
 document.getElementById("boardOverlayClose").addEventListener("click", closeBoardOverlay);
 document.getElementById("boardPopupOverlay").addEventListener("click", closeBoardPopup);
@@ -764,7 +762,7 @@ document.querySelectorAll(".inspector-tab").forEach(tab => {
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") {
     closeFullscreen(); closeBoardPopup(); closeBottomSheet();
-    closeInfoSheet(); closeFavSheet(); closeBoardsSheet(); closeBoardOverlay();
+    closeInfoSheet(); closeFavSheet(); closeBoardsSheet(); closeBoardOverlay(); closeAmbient();
   }
   if (event.key.toLowerCase() === "n" || event.key === "ArrowRight") { nextItem(); resetAutoplayTimer(); }
   if (event.key === "ArrowLeft") { previousItem(); resetAutoplayTimer(); }
